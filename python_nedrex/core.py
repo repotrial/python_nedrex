@@ -1,8 +1,5 @@
-from itertools import chain
 from multiprocessing.sharedctypes import Value
-from tabnanny import check
-from typing import Any, Final, Optional
-from matplotlib.container import Container
+from typing import Any, Optional
 import requests
 
 from python_nedrex import config
@@ -96,7 +93,6 @@ def get_edges(
     if type not in get_edge_types():
         raise ValueError(f"{type=} not in edge types")
     
-
     items = requests.get(f"{config._url_base}/{type}/all").json()
 
     return items

@@ -9,7 +9,7 @@ TCallable = TypeVar("TCallable", bound=Callable)
 
 def check_url_base(func: TCallable) -> TCallable:
     def wrapped_fx(*args, **kwargs):
-        if hasattr(config, "_url_base"):
+        if hasattr(config, "_url_base") and config._url_base is not None:
             return func(*args, **kwargs)
         else:
             raise ConfigError("API URL is not set in the config")
