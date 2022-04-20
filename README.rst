@@ -20,7 +20,7 @@ A Python library for interfacing with the PNeDRex API
 
 
 * Free software: MIT license
-* Documentation: https://docs.google.com/document/d/1R0VomdzdECKN2kjMcqS_251h9ZF2Fhd3XYog4oDWdj8/edit?usp=sharing
+* Documentation: https://docs.google.com/document/d/1nUngfKSXkqPi_EPaD9d1w3M0SVAuhj6PY4tRMgA8RMk/edit?usp=sharing
 ..
   * Documentation: https://python-nedrex.readthedocs.io.
 
