@@ -11,7 +11,8 @@ from python_nedrex.exceptions import ConfigError, NeDRexError
 @check_url_base
 def get_api_key(*, accept_eula: bool = False) -> str:
     url = f"{config._url_base}/admin/api_key/generate"
-    response = requests.post(url, params={"accept_eula": accept_eula})
+    print(accept_eula)
+    response = requests.post(url, json={"accept_eula": accept_eula})
     return response.json()
 
 
