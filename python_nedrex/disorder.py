@@ -1,22 +1,24 @@
-from typing import Union
+"""Module containing python functions to access the disorder routes in the NeDRex API"""
 
-import requests
+from typing import Any, Callable, List, Union
+
+import requests  # type: ignore
 
 from python_nedrex import config
 from python_nedrex.decorators import check_url_base
 
 
-def _generate_route(path: str):
+def _generate_route(path: str) -> Callable[[Union[str, List[str]]], Any]:
     @check_url_base
-    def f(codes: Union[str, list[str]]):
+    def new_func(codes: Union[str, List[str]]) -> Any:
         if isinstance(codes, str):
             codes = [codes]
 
-        url = f"{config._url_base}/disorder/{path}"
-        resp = requests.get(url, params={"q": codes})
+        url = f"{config.url_base}/disorder/{path}"
+        resp = requests.get(url, params={"q": codes}, headers={"x-api-key": config.api_key})
         return resp.json()
 
-    return f
+    return new_func
 
 
 search_by_icd10 = _generate_route("get_by_icd10")

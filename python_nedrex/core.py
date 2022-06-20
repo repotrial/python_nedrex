@@ -1,49 +1,77 @@
-from multiprocessing.sharedctypes import Value
-from optparse import Option
-from typing import Any, Optional
-import requests
+"""Module containing functions relating to the general routes in the NeDRex API
+
+Additionally, this module also contains routes for obtaining API keys.
+"""
+
+from typing import Any, Dict, Generator, List, Optional
+
+import requests  # type: ignore
 
 from python_nedrex import config
+from python_nedrex.common import get_pagination_limit
 from python_nedrex.decorators import check_url_base
 from python_nedrex.exceptions import ConfigError, NeDRexError
 
 
+def _check_type(coll_name: str, coll_type: str) -> bool:
+    if coll_type == "edge":
+        if coll_name in get_edge_types():
+            return True
+        raise NeDRexError(f"type={coll_name!r} not in NeDRex edge types")
+
+    if coll_type == "node":
+        if coll_name in get_node_types():
+            return True
+        raise NeDRexError(f"type={coll_name!r} not in NeDRex node types")
+
+    raise NeDRexError(f"_check_type received invalid coll_type={coll_type!r}")
+
+
 @check_url_base
-def get_api_key(*, accept_eula: bool = False) -> str:
-    url = f"{config._url_base}/admin/api_key/generate"
-    print(accept_eula)
-    response = requests.post(url, json={"accept_eula": accept_eula})
+def get_api_key(*, accept_eula: bool = False) -> Any:
+    """Obtains a new API key from the NeDRex API.
+
+    This function will only return if accept_eula is explicitly set to True
+    """
+    if accept_eula is not True:
+        raise NeDRexError("an API key cannot be obtained unless accept_eula is set to True")
+
+    url = f"{config.url_base}/admin/api_key/generate"
+    response = requests.post(
+        url,
+        json={"accept_eula": accept_eula},
+    )
     return response.json()
 
 
 @check_url_base
-def get_node_types() -> list[str]:
+def get_node_types() -> Any:
     """
     Returns the list of node types stored in NeDRexDB
 
         Returns:
             node_list (list[str]): List of node types in NeDRex
     """
-    url: str = f"{config._url_base}/list_node_collections"
-    node_list = requests.get(url).json()
+    url: str = f"{config.url_base}/list_node_collections"
+    node_list = requests.get(url, headers={"x-api-key": config.api_key}).json()
     return node_list
 
 
 @check_url_base
-def get_edge_types() -> list[str]:
+def get_edge_types() -> Any:
     """
     Returns a list of edge types stored in NeDRexDB
 
         Returns:
             edge_list (list[str]): List of edge types in NeDRex
     """
-    url: str = f"{config._url_base}/list_edge_collections"
-    edge_list = requests.get(url).json()
+    url: str = f"{config.url_base}/list_edge_collections"
+    edge_list = requests.get(url, headers={"x-api-key": config.api_key}).json()
     return edge_list
 
 
 @check_url_base
-def get_collection_attributes(type: str) -> list[str]:
+def get_collection_attributes(coll_type: str, include_counts: bool = False) -> Any:
     """
     Retrurns a list of the available attributes stored in NeDRex for the given type
 
@@ -53,13 +81,15 @@ def get_collection_attributes(type: str) -> list[str]:
         Returns:
             attr_list (list[str]): The list of available attributes for the specified node/edge type
     """
-    url: str = f"{config._url_base}/{type}/attributes"
-    attr_list = requests.get(url).json()
+    url: str = f"{config.url_base}/{coll_type}/attributes"
+    attr_list = requests.get(
+        url, headers={"x-api-key": config.api_key}, params={"include_counts": include_counts}
+    ).json()
     return attr_list
 
 
 @check_url_base
-def get_node_ids(type: str):
+def get_node_ids(coll_type: str) -> Any:
     """
     Returns a list of node identifiers in NeDRex for the given type
 
@@ -68,17 +98,12 @@ def get_node_ids(type: str):
         Returns:
             node_ids (list[str]): The list of available node_ids for the specified node type
     """
-    if type not in get_node_types():
-        raise NeDRexError(f"{type=} not in NeDRex node types")
+    _check_type(coll_type, "node")
 
-    url: str = f"{config._url_base}/{type}/attributes/primaryDomainId/json"
+    url: str = f"{config.url_base}/{coll_type}/attributes/primaryDomainId/json"
 
-    resp = requests.get(url, params={"api_key": config._api_key})
-    if (
-        resp.status_code == 401
-        and resp.json()["detail"]
-        == "A valid API key is required to access the requested data"
-    ):
+    resp = requests.get(url, headers={"x-api-key": config.api_key})
+    if resp.status_code == 401 and resp.json()["detail"] == "A valid API key is required to access the requested data":
         raise ConfigError("API key is required for the requested data")
 
     node_ids = [i["primaryDomainId"] for i in resp.json()]
@@ -87,30 +112,44 @@ def get_node_ids(type: str):
 
 @check_url_base
 def get_nodes(
-    type: str,
-    attributes: Optional[list[str]] = None,
-    node_ids: Optional[list[str]] = None,
+    node_type: str,
+    attributes: Optional[List[str]] = None,
+    node_ids: Optional[List[str]] = None,
     limit: Optional[int] = None,
-    offset: Optional[int] = None,
-) -> list[dict[str, Any]]:
+    offset: int = 0,
+) -> Any:
+    """
+    Returns nodes in NeDRex for the given type
 
-    if type not in get_node_types():
-        raise NeDRexError(f"{type=} not in NeDRex node types")
+        Parameters:
+            node_type (str): The node type to collect
+            attributes (Optional[list[str]]): A list of attributes to return for the collected nodes. The default
+              (None) returns all attributes.
+            node_ids (Optional[list[str]]): A list of the specific node IDs to return. The default (None) returns all
+              nodes.
+            limit (Optional[int]): A limit for the number of records to be returned. The maximum value for this is set
+              by the API.
+            offset (int): The number of records to skip before returning records. Default is 0 (no records skipped).
+        Returns:
+            node_ids (list[str]): The list of available node_ids for the specified node type
+    """
+    _check_type(node_type, "node")
+
+    upper_limit = get_pagination_limit()
+    if limit and upper_limit < limit:
+        raise NeDRexError(f"limit={limit:,} is too great (maximum is {upper_limit:,})")
 
     params = {
         "node_id": node_ids,
         "attribute": attributes,
         "offset": offset,
         "limit": limit,
-        "api_key": config._api_key,
     }
 
-    resp = requests.get(f"{config._url_base}/{type}/attributes/json", params=params)
-    if (
-        resp.status_code == 401
-        and resp.json()["detail"]
-        == "A valid API key is required to access the requested data"
-    ):
+    resp = requests.get(
+        f"{config.url_base}/{node_type}/attributes/json", params=params, headers={"x-api-key": config.api_key}
+    )
+    if resp.status_code == 401 and resp.json()["detail"] == "A valid API key is required to access the requested data":
         raise ConfigError("API key is required for the requested data")
 
     items = resp.json()
@@ -118,23 +157,82 @@ def get_nodes(
 
 
 @check_url_base
+def iter_nodes(
+    node_type: str,
+    attributes: Optional[List[str]] = None,
+    node_ids: Optional[List[str]] = None,
+) -> Generator[Dict[str, Any], None, None]:
+
+    _check_type(node_type, "node")
+    upper_limit = get_pagination_limit()
+
+    params: Dict[str, Any] = {
+        "node_id": node_ids,
+        "attribute": attributes,
+        "limit": upper_limit,
+    }
+
+    offset = 0
+    while True:
+        params["offset"] = offset
+        resp = requests.get(
+            f"{config.url_base}/{node_type}/attributes/json", params=params, headers={"x-api-key": config.api_key}
+        )
+        if resp.status_code != 200:
+            raise Exception()
+
+        data = resp.json()
+        for doc in data:
+            yield doc
+
+        if len(data) < upper_limit:
+            break
+        offset += upper_limit
+
+
+@check_url_base
 def get_edges(
-    type: str,
+    edge_type: str,
     limit: Optional[int] = None,
     offset: Optional[int] = None,
-):
-    if type not in get_edge_types():
-        raise NeDRexError(f"{type=} not in NeDRex edge types")
+) -> Any:
+    """
+    Returns edges in NeDRex of the given type
 
-    params = {"limit": limit, "offset": offset, "api_key": config._api_key}
+        Parameters:
+            edge_type (str): The node type to collect
+            limit (Optional[int]): A limit for the number of records to be returned. The maximum value for this is set
+              by the API.
+            offset (int): The number of records to skip before returning records. Default is 0 (no records skipped).
+    """
+    _check_type(edge_type, "edge")
 
-    resp = requests.get(f"{config._url_base}/{type}/all", params=params)
-    if (
-        resp.status_code == 401
-        and resp.json()["detail"]
-        == "A valid API key is required to access the requested data"
-    ):
+    params = {"limit": limit, "offset": offset, "api_key": config.api_key}
+
+    resp = requests.get(f"{config.url_base}/{edge_type}/all", params=params, headers={"x-api-key": config.api_key})
+    if resp.status_code == 401 and resp.json()["detail"] == "A valid API key is required to access the requested data":
         raise ConfigError("API key is required for the requested data")
 
     items = resp.json()
     return items
+
+
+@check_url_base
+def iter_edges(edge_type: str) -> Generator[Dict[str, Any], None, None]:
+    _check_type(edge_type, "edge")
+    upper_limit = get_pagination_limit()
+
+    offset = 0
+    while True:
+        params = {"offset": offset, "limit": upper_limit}
+        resp = requests.get(f"{config.url_base}/{edge_type}/all", params=params, headers={"x-api-key": config.api_key})
+        if resp.status_code != 200:
+            raise Exception()
+
+        data = resp.json()
+        for doc in data:
+            yield doc
+
+        if len(data) < upper_limit:
+            break
+        offset += upper_limit
