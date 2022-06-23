@@ -2,15 +2,17 @@
 
 """Tests for `python_nedrex` package."""
 
-from collections import defaultdict
+import random
 from contextlib import contextmanager
 from functools import lru_cache
-from typing import Optional, Tuple
+
+from more_itertools import take
 
 import pytest
 import requests
 
 import python_nedrex
+from python_nedrex.common import get_pagination_limit
 from python_nedrex.core import (
     get_edges,
     iter_edges,
@@ -20,6 +22,7 @@ from python_nedrex.core import (
     get_collection_attributes,
     get_node_ids,
     get_nodes,
+    api_keys_active,
 )
 from python_nedrex.disorder import (
     get_disorder_ancestors,
@@ -29,6 +32,8 @@ from python_nedrex.disorder import (
     search_by_icd10,
 )
 from python_nedrex.exceptions import ConfigError, NeDRexError
+from python_nedrex.ppi import ppis
+from python_nedrex.relations import get_encoded_proteins, get_drugs_indicated_for_disorders, get_drugs_targetting_proteins, get_drugs_targetting_gene_products
 
 
 API_URL = "http://82.148.225.92:8123/"
@@ -62,6 +67,14 @@ def get_edge_collections():
     with api_key(), url_base():
         collections = get_edge_types()
     return collections
+
+
+def get_random_disorder_selection(n, skip_root=True):
+    random.seed(20220621)
+    with api_key(), url_base():
+        disorder_ids = set(get_node_ids("disorder"))
+    disorder_ids.remove("mondo.0000001")
+    return random.sample(sorted(disorder_ids), n)
 
 
 @pytest.fixture
@@ -220,15 +233,241 @@ class TestGetNodeRoutes:
 
 class TestDisorderRoutes:
     def test_search_by_icd10(self, set_base_url, set_api_key):
-        result = search_by_icd10("I52")
-        assert result == []
+        # NOTE: There is currently an ICD-10 mapping issue due to MONDO
+        search_by_icd10("I52")
 
+    def test_get_disorder_ancestors(self, set_base_url, set_api_key):
+        # Check that `disease or disorder`is an ancestor of `lupus nephritis`
+        # `disease or disorder` is not a parent of `lupus neprhitis`
+        lupus_nephritis = "mondo.0005556"
+        disease_or_disorder = "mondo.0000001"
+        
+        result = get_disorder_ancestors(lupus_nephritis)
+        assert disease_or_disorder in result[lupus_nephritis]
+
+    def test_get_disorder_descendants(self, set_base_url, set_api_key):
+        # Check that `lupus nephritis` is a descendant of `inflammatory disease`
+        # `lupus nephritis` is not a child of `inflammatory disease`
+        inflam_disease = "mondo.0021166"
+        lupus_nephritis = "mondo.0005556"
+        
+        result = get_disorder_descendants(inflam_disease)
+        assert lupus_nephritis in result[inflam_disease]
+
+    def test_get_disorder_parents(self, set_base_url, set_api_key):
+        # Check that `glomerulonephritis` is a parent of `lupus nephritis`
+        lupus_nephritis = "mondo.0005556"
+        glomerulonephritis = "mondo.0002462"
+        
+        result = get_disorder_parents('mondo.0005556')
+        assert glomerulonephritis in result[lupus_nephritis]
+
+    def test_get_disorder_children(self, set_base_url, set_api_key):
+        # Check that `lupus nephritis` is a child of `glomerulonephritis`
+        glomerulonephritis = "mondo.0002462"
+        lupus_nephritis = "mondo.0005556"
+
+        result = get_disorder_children(glomerulonephritis)
+        assert lupus_nephritis in result[glomerulonephritis]
+
+
+    @pytest.mark.parametrize('chosen_id', get_random_disorder_selection(20))
+    def test_parent_child_reciprocity(self, set_base_url, set_api_key, chosen_id):
+        parents = get_disorder_parents(chosen_id)
+        children_of_parents = get_disorder_children(parents[chosen_id])
+        assert all(chosen_id in value for value in children_of_parents.values())
+
+    @pytest.mark.parametrize('chosen_id', get_random_disorder_selection(20))
+    def test_ancestor_descendant_reciprocity(self, set_base_url, set_api_key, chosen_id):
+        parents = get_disorder_ancestors(chosen_id)
+        descendants_of_parents = get_disorder_descendants(parents[chosen_id])
+        assert all(chosen_id in value for value in descendants_of_parents.values())
 
 class TestRoutesFailWithoutAPIUrl:
-    def test_get_node_type(self):
-        with pytest.raises(ConfigError):
+    def test_get_node_type(self, set_api_key):
+        with pytest.raises(ConfigError) as excinfo:
             get_node_types()
+        assert "API URL is not set in the config" == str(excinfo.value)
 
-    def test_get_edge_type(self):
-        with pytest.raises(ConfigError):
+    def test_get_edge_type(self, set_api_key):
+        with pytest.raises(ConfigError) as excinfo:
             get_edge_types()
+        assert "API URL is not set in the config" == str(excinfo.value)
+
+
+
+class TestRoutesFailWithoutAPIKey:
+    def test_get_node_type(self, set_base_url):
+        if not api_keys_active():
+            return
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_node_types()
+        assert "no API key set in the configuration" == str(excinfo.value)
+    
+        if not api_keys_active():
+            return
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_edge_types()
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+    @pytest.mark.parametrize("collection", get_node_collections())
+    def test_node_routes_fail(self, set_base_url, collection):
+        if not api_keys_active():
+            return
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_collection_attributes(collection)
+        assert "no API key set in the configuration" == str(excinfo.value)
+            
+        with pytest.raises(ConfigError) as excinfo:
+            get_node_ids(collection)
+        assert "no API key set in the configuration" == str(excinfo.value)
+        
+        with pytest.raises(ConfigError) as excinfo:
+            get_nodes(collection)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            for _ in take(1, iter_nodes(collection)):
+                pass
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+
+    @pytest.mark.parametrize("collection", get_edge_collections())
+    def test_edge_routes_fail(self, set_base_url, collection):
+        if not api_keys_active():
+            return
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_collection_attributes(collection)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_edges(collection)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            for _ in take(1, iter_edges(collection)):
+                pass
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+
+    def test_disorder_routes_fail(self, set_base_url):
+        disorder_id = "mondo.0000001"  # root of the MONDO tree
+        icd10_id = "I59.1"  # Heart disease, unspecified
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_disorder_children(disorder_id)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_disorder_parents(disorder_id)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_disorder_ancestors(disorder_id)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            get_disorder_descendants(disorder_id)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+        with pytest.raises(ConfigError) as excinfo:
+            search_by_icd10(icd10_id)
+        assert "no API key set in the configuration" == str(excinfo.value)
+
+
+class TestPPIRoute():
+    def test_ppi_route(self, set_base_url, set_api_key):
+        ppis(["exp"], 0, get_pagination_limit())
+
+    def test_overlap_with_pagination(self, set_base_url, set_api_key):
+        page_limit = 1_000
+        delta = page_limit // 2
+        skip = delta
+
+        previous = ppis(["exp"], 0, page_limit)
+        
+        for _ in range(100):
+            current = ppis(['exp'], skip, page_limit)
+            assert previous[-delta:] == current[:delta]
+            previous = current
+            skip += delta
+    
+    def test_each_evidence_type_works(self, set_base_url, set_api_key):
+        for evidence_type in ["exp", "pred", "ortho"]:
+            results = ppis([evidence_type], 0, get_pagination_limit())
+            assert all(evidence_type in doc['evidenceTypes'] for doc in results)
+        
+    def test_fails_with_invalid_type(self, set_base_url, set_api_key):
+        for evidence_type in ["exps", "pr3d", "orth"]:
+            with pytest.raises(NeDRexError) as excinfo:
+                ppis([evidence_type])
+            err_val = {evidence_type}
+            assert str(excinfo.value) == f"unexpected evidence types: {err_val}"
+
+    def test_fails_with_large_limit(self, set_base_url, set_api_key):
+        page_limit = get_pagination_limit()
+        with pytest.raises(NeDRexError) as excinfo:
+            ppis(["exp"], limit=page_limit + 1)
+        
+        assert str(excinfo.value) == f"limit={page_limit + 1:,} is too great (maximum is {page_limit:,})"
+
+
+class TestRelationshipRoutes:
+    def test_get_encoded_proteins(self, set_base_url, set_api_key):
+        # NOTE: If result changes, check these examples are still accurate.
+
+        histamine_receptor_genes = [
+            "3269", # HRH1, as str
+            3274, # HRH2, as int
+            "entrez.11255" # HRH3, as prefix
+        ]
+
+        results = get_encoded_proteins(histamine_receptor_genes)
+
+        assert "P35367" in results["3269"]
+        assert "P25021" in results["3274"]
+        assert "Q9Y5N1" in results["11255"]
+
+    def test_get_drugs_indicated_for_disorders(self, set_base_url, set_api_key):
+        # NOTE: If result changes, check these examples are still accurate.
+        
+        disorders = [
+            "mondo.0005393", # Gout
+            "0005362", # ED
+        ]
+
+        results = get_drugs_indicated_for_disorders(disorders)
+
+        assert "DB00437" in results["0005393"] # Allopurinol for gout
+        assert "DB00203" in results["0005362"] # Sildenafil for ED
+
+    def test_get_drugs_targetting_proteins(self, set_base_url, set_api_key):
+        # NOTE: If result changes, check these examples are still accurate.
+
+        proteins = [
+            "P35367", # Histamine H1 receptor, targetted by antihistamines
+            "uniprot.P03372",  # Estrogen receptor α, targetted by ethinylestradiol
+        ]
+
+        results = get_drugs_targetting_proteins(proteins)
+
+        assert "DB00341" in results["P35367"]
+        assert "DB00977" in results["P03372"]
+
+
+    def test_get_drugs_targetting_gene_products(self, set_base_url, set_api_key):
+        genes = [
+            "entrez.3269", # HRH1 gene (product targetted by antihistamines)
+            2099, # Estrogen receptor α gene (product targetted by ethinylestradiol)
+            "6532", # SLC6A4, encodes Sodium-dependent serotonin transporter, targetted by SSRIs
+        ]
+
+        results = get_drugs_targetting_gene_products(genes)
+
+        assert "DB00341" in results["3269"]
+        assert "DB00977" in results['2099']
+        assert "DB00215" in results["6532"]

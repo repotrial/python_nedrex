@@ -1,9 +1,8 @@
 import os
 from typing import Optional
 
-import requests  # type: ignore
-
 from python_nedrex import config
+from python_nedrex.common import http
 from python_nedrex.decorators import check_url_vpd
 
 
@@ -24,7 +23,7 @@ def get_vpd(disorder: str, number_of_patients: int, out_dir: str) -> Optional[st
     url: str = f"{config.url_vpd}/vpd/{disorder}/{archive_name}"
     archive: str = os.path.join(out_dir, archive_name)
 
-    data = requests.get(url)
+    data = http.get(url)
     if data.status_code != 200:
         return None
 
