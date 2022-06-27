@@ -2,7 +2,11 @@
 
 """Tests for `python_nedrex` package."""
 
+import os
+from pathlib import Path
 import random
+import tempfile
+import time
 from contextlib import contextmanager
 from functools import lru_cache
 
@@ -32,6 +36,11 @@ from python_nedrex.disorder import (
     search_by_icd10,
 )
 from python_nedrex.exceptions import ConfigError, NeDRexError
+from python_nedrex.graph import (
+    build_request,
+    check_build_status,
+    download_graph,
+)
 from python_nedrex.ppi import ppis
 from python_nedrex.relations import get_encoded_proteins, get_drugs_indicated_for_disorders, get_drugs_targetting_proteins, get_drugs_targetting_gene_products
 
@@ -471,3 +480,63 @@ class TestRelationshipRoutes:
         assert "DB00341" in results["3269"]
         assert "DB00977" in results['2099']
         assert "DB00215" in results["6532"]
+
+
+class TestGraphRoutes:
+    def test_default_build(self, set_base_url, set_api_key):
+        build_request()
+
+    @pytest.mark.parametrize("kwargs", [
+        {"nodes":["this_is_not_a_node"]},
+        {"edges":["this_is_not_an_edge"]},
+        {"ppi_evidence": ["made_up"]},
+        {"taxid": ["human"]}
+        ])
+    def test_build_fails_with_invalid_params(self, kwargs, set_base_url, set_api_key):
+        with pytest.raises(NeDRexError):
+            build_request(**kwargs)
+    
+    def test_get_uid(self, set_base_url, set_api_key):
+        uid = build_request()
+        check_build_status(uid)
+
+    def test_fails_with_invalid_uid(self, set_base_url, set_api_key):
+        uid = "this-is-not-a-valid-uid!"
+        with pytest.raises(NeDRexError):
+            check_build_status(uid)
+    
+    def test_download_graph(self, set_base_url, set_api_key):
+        uid = build_request()
+        while True:
+            status = check_build_status(uid)
+            if status['status'] == 'completed':
+                break
+            time.sleep(10)
+
+        download_graph(uid)
+        p = Path(f"{uid}.graphml")
+        assert p.exists()
+        p.unlink()
+    
+
+    def test_download_graph_different_dir(self, set_base_url, set_api_key):
+        with tempfile.TemporaryDirectory() as tmpdir:
+
+            uid = build_request()
+            while True:
+                status = check_build_status(uid)
+                if status['status'] == 'completed':
+                    break
+                time.sleep(10)
+
+            target = os.path.join(tmpdir, "mygraph.graphml")
+
+            download_graph(uid, target)
+            p = Path(target)
+            assert p.exists()
+            p.unlink()
+    
+    def test_download_fails_with_invalid_uid(self, set_base_url, set_api_key):
+        uid = "this-is-not-a-valid-uid!"
+        with pytest.raises(NeDRexError):
+            download_graph(uid)
