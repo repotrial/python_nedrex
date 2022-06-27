@@ -1,3 +1,4 @@
+import urllib.request
 from typing import Any, Optional
 
 import requests  # type: ignore
@@ -60,3 +61,17 @@ def get_pagination_limit() -> Any:
 def check_pagination_limit(limit: Optional[int], upper_limit: int) -> None:
     if limit and upper_limit < limit:
         raise NeDRexError(f"limit={limit:,} is too great (maximum is {upper_limit:,})")
+
+
+def download_file(url: str, target: str) -> None:
+    if config.api_key is not None:
+        opener = urllib.request.build_opener()
+        opener.addheaders = [("x-api-key", config.api_key)]
+        urllib.request.install_opener(opener)
+
+    try:
+        urllib.request.urlretrieve(url, target)
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            raise NeDRexError("not found") from err
+        raise NeDRexError("unexpected failure") from err

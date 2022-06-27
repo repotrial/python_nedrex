@@ -1,11 +1,8 @@
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from python_nedrex import config
-from python_nedrex.common import check_response, http
-from python_nedrex.exceptions import NeDRexError
+from python_nedrex.common import check_response, download_file, http
 
 
 # pylint: disable=R0913
@@ -75,16 +72,6 @@ def download_graph(uid: str, target: Optional[str] = None) -> None:
     if target is None:
         target = str(Path(f"{uid}.graphml").resolve())
 
-    if config.api_key is not None:
-        opener = urllib.request.build_opener()
-        opener.addheaders = [("x-api-key", config.api_key)]
-        urllib.request.install_opener(opener)
-
     url = f"{config.url_base}/graph/download/{uid}/{uid}.graphml"
 
-    try:
-        urllib.request.urlretrieve(url, target)
-    except urllib.error.HTTPError as err:
-        if err.code == 404:
-            raise NeDRexError("not found") from err
-        raise NeDRexError("unexpected failure") from err
+    download_file(url, target)
