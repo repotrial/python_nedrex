@@ -1,12 +1,14 @@
-from typing import Any, Dict, List
+from typing import List as _List
 
-from python_nedrex import config
-from python_nedrex.common import check_response, http
+from python_nedrex import config as _config
+from python_nedrex.common import check_response as _check_response
+from python_nedrex.common import check_status_factory as _check_status_factory
+from python_nedrex.common import http as _http
 
 
 # pylint: disable=R0913
 def robust_submit(
-    seeds: List[str],
+    seeds: _List[str],
     network: str = "DEFAULT",
     initial_fraction: float = 0.25,
     reduction_factor: float = 0.9,
@@ -22,29 +24,22 @@ def robust_submit(
         "num_trees": num_trees,
         "threshold": threshold,
     }
-    url = f"{config.url_base}/robust/submit"
+    url = f"{_config.url_base}/robust/submit"
 
-    resp = http.post(url, json=body, headers={"x-api-key": config.api_key})
-    result: str = check_response(resp)
+    resp = _http.post(url, json=body, headers={"x-api-key": _config.api_key})
+    result: str = _check_response(resp)
     return result
 
 
 # pylint: enable=R0913
 
-
-def check_robust_status(uid: str) -> Dict[str, Any]:
-    url = f"{config.url_base}/robust/status"
-    params = {"uid": uid}
-
-    resp = http.get(url, params=params, headers={"x-api-key": config.api_key})
-    result: Dict[str, Any] = check_response(resp)
-    return result
+check_robust_status = _check_status_factory("/robust/status")
 
 
 def download_robust_results(uid: str) -> str:
-    url = f"{config.url_base}/robust/results"
+    url = f"{_config.url_base}/robust/results"
     params = {"uid": uid}
 
-    resp = http.get(url, params=params, headers={"x-api-key": config.api_key})
-    result: str = check_response(resp)
+    resp = _http.get(url, params=params, headers={"x-api-key": _config.api_key})
+    result: str = _check_response(resp, return_type="text")
     return result

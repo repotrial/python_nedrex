@@ -1,12 +1,14 @@
-from typing import Any, Dict, List
+from typing import List as _List
 
-from python_nedrex import config
-from python_nedrex.common import check_response, http
+from python_nedrex import config as _config
+from python_nedrex.common import check_response as _check_response
+from python_nedrex.common import check_status_factory as _check_status_factory
+from python_nedrex.common import http as _http
 
 
 # pylint: disable=R0913
 def must_request(
-    seeds: List[str],
+    seeds: _List[str],
     hubpenalty: float,
     multiple: bool,
     trees: int,
@@ -22,17 +24,13 @@ def must_request(
         "maxit": maxit,
     }
 
-    url = f"{config.url_base}/must/submit"
-    resp = http.post(url, json=body, headers={"x-api-key": config.api_key})
-    result: str = check_response(resp)
+    url = f"{_config.url_base}/must/submit"
+    resp = _http.post(url, json=body, headers={"x-api-key": _config.api_key})
+    result: str = _check_response(resp)
     return result
 
 
 # pylint: enable=R0913
 
 
-def check_must_status(uid: str) -> Dict[str, Any]:
-    url = f"{config.url_base}/must/status"
-    resp = http.get(url, params={"uid": uid})
-    result: Dict[str, Any] = check_response(resp)
-    return result
+check_must_status = _check_status_factory("/must/status")

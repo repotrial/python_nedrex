@@ -1,13 +1,13 @@
-import os
-from typing import Optional
+import os as _os
+from typing import Optional as _Optional
 
-from python_nedrex import config
-from python_nedrex.common import http
-from python_nedrex.decorators import check_url_vpd
+from python_nedrex import config as _config
+from python_nedrex.common import http as _http
+from python_nedrex.decorators import check_url_vpd as _check_url_vpd
 
 
-@check_url_vpd
-def get_vpd(disorder: str, number_of_patients: int, out_dir: str) -> Optional[str]:
+@_check_url_vpd
+def get_vpd(disorder: str, number_of_patients: int, out_dir: str) -> _Optional[str]:
     """
     Downloads a .zip archive with the requested virtual patient data to the given directory.
 
@@ -20,10 +20,10 @@ def get_vpd(disorder: str, number_of_patients: int, out_dir: str) -> Optional[st
             archive (str): Absolute path of the downloaded zip archive or None if the requested resource does not exist.
     """
     archive_name: str = f"{disorder}_1000GP_{number_of_patients}VPSim.zip"
-    url: str = f"{config.url_vpd}/vpd/{disorder}/{archive_name}"
-    archive: str = os.path.join(out_dir, archive_name)
+    url: str = f"{_config.url_vpd}/vpd/{disorder}/{archive_name}"
+    archive: str = _os.path.join(out_dir, archive_name)
 
-    data = http.get(url)
+    data = _http.get(url)
     if data.status_code != 200:
         return None
 

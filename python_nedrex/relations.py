@@ -1,10 +1,14 @@
-from typing import Dict, Iterable, List, Union
+from typing import Dict as _Dict
+from typing import Iterable as _Iterable
+from typing import List as _List
+from typing import Union as _Union
 
-from python_nedrex import config
-from python_nedrex.common import check_response, http
+from python_nedrex import config as _config
+from python_nedrex.common import check_response as _check_response
+from python_nedrex.common import http as _http
 
 
-def get_encoded_proteins(gene_list: Iterable[Union[int, str]]) -> Dict[str, List[str]]:
+def get_encoded_proteins(gene_list: _Iterable[_Union[int, str]]) -> _Dict[str, _List[str]]:
     """
     Genes the proteins encoded by genes in a supplied gene list.
 
@@ -23,13 +27,13 @@ def get_encoded_proteins(gene_list: Iterable[Union[int, str]]) -> Dict[str, List
         else:
             genes.append(gene)
 
-    url = f"{config.url_base}/relations/get_encoded_proteins"
-    resp = http.get(url, params={"gene": genes}, headers={"x-api-key": config.api_key})
-    result: Dict[str, List[str]] = check_response(resp)
+    url = f"{_config.url_base}/relations/get_encoded_proteins"
+    resp = _http.get(url, params={"gene": genes}, headers={"x-api-key": _config.api_key})
+    result: _Dict[str, _List[str]] = _check_response(resp)
     return result
 
 
-def get_drugs_indicated_for_disorders(disorder_list: Iterable[str]) -> Dict[str, List[str]]:
+def get_drugs_indicated_for_disorders(disorder_list: _Iterable[str]) -> _Dict[str, _List[str]]:
     disorders = []
     for disorder in disorder_list:
         if not isinstance(disorder, str):
@@ -40,13 +44,13 @@ def get_drugs_indicated_for_disorders(disorder_list: Iterable[str]) -> Dict[str,
         else:
             disorders.append(f"mondo.{disorder}")
 
-    url = f"{config.url_base}/relations/get_drugs_indicated_for_disorders"
-    resp = http.get(url, params={"disorder": disorders}, headers={"x-api-key": config.api_key})
-    result: Dict[str, List[str]] = check_response(resp)
+    url = f"{_config.url_base}/relations/get_drugs_indicated_for_disorders"
+    resp = _http.get(url, params={"disorder": disorders}, headers={"x-api-key": _config.api_key})
+    result: _Dict[str, _List[str]] = _check_response(resp)
     return result
 
 
-def get_drugs_targetting_proteins(protein_list: Iterable[str]) -> Dict[str, List[str]]:
+def get_drugs_targetting_proteins(protein_list: _Iterable[str]) -> _Dict[str, _List[str]]:
     proteins = []
     for protein in protein_list:
         if not isinstance(protein, str):
@@ -57,13 +61,13 @@ def get_drugs_targetting_proteins(protein_list: Iterable[str]) -> Dict[str, List
         else:
             proteins.append(f"uniprot.{protein}")
 
-    url = f"{config.url_base}/relations/get_drugs_targetting_proteins"
-    resp = http.get(url, params={"protein": proteins}, headers={"x-api-key": config.api_key})
-    result: Dict[str, List[str]] = check_response(resp)
+    url = f"{_config.url_base}/relations/get_drugs_targetting_proteins"
+    resp = _http.get(url, params={"protein": proteins}, headers={"x-api-key": _config.api_key})
+    result: _Dict[str, _List[str]] = _check_response(resp)
     return result
 
 
-def get_drugs_targetting_gene_products(gene_list: Iterable[str]) -> Dict[str, List[str]]:
+def get_drugs_targetting_gene_products(gene_list: _Iterable[str]) -> _Dict[str, _List[str]]:
     genes = []
     for gene in gene_list:
         if isinstance(gene, int):
@@ -77,7 +81,7 @@ def get_drugs_targetting_gene_products(gene_list: Iterable[str]) -> Dict[str, Li
         else:
             genes.append(gene)
 
-    url = f"{config.url_base}/relations/get_drugs_targetting_gene_products"
-    resp = http.get(url, params={"gene": genes}, headers={"x-api-key": config.api_key})
-    result: Dict[str, List[str]] = check_response(resp)
+    url = f"{_config.url_base}/relations/get_drugs_targetting_gene_products"
+    resp = _http.get(url, params={"gene": genes}, headers={"x-api-key": _config.api_key})
+    result: _Dict[str, _List[str]] = _check_response(resp)
     return result
