@@ -1,3 +1,4 @@
 attrs==21.4.0
 cachetools==4.2.4
+pytest==7.0.1  
 requests==2.27.1
