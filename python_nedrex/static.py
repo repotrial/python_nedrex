@@ -16,7 +16,7 @@ def get_metadata() -> _Dict[str, _Any]:
 
 
 def get_license() -> str:
-    url = f"{_config.url_base}/static/license"
+    url = f"{_config.url_base}/static/licence"
     resp = _http.get(url)
     result: str = _check_response(resp)
     return result
