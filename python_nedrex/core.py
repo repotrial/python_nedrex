@@ -194,20 +194,29 @@ def get_nodes(
     limit: _Optional[int] = None,
     offset: int = 0,
 ) -> _Any:
-    """
-    Returns nodes in NeDRex for the given type
+    """Returns nodes in NeDRex of the given type
 
-        Parameters:
-            node_type (str): The node type to collect
-            attributes (Optional[list[str]]): A list of attributes to return for the collected nodes. The default
-              (None) returns all attributes.
-            node_ids (Optional[list[str]]): A list of the specific node IDs to return. The default (None) returns all
-              nodes.
-            limit (Optional[int]): A limit for the number of records to be returned. The maximum value for this is set
-              by the API.
-            offset (int): The number of records to skip before returning records. Default is 0 (no records skipped).
-        Returns:
-            node_ids (list[str]): The list of available node_ids for the specified node type
+    Parameters
+    ----------
+    node_type : str
+        The node type to collect
+    attributes : list[str], optional
+        A list of attributes to return for the collected nodes. The
+        default, None, returns all attributes.
+    node_ids : list[str], optional
+        A list of IDs of specific nodes to be returned. The default (None)
+        does no filtering by node ID.
+    limit : int, optional
+        A limit for the number of records to be returned. The default is
+        determined by querying the API.
+    offset : int, optional
+        The number of records to skip before returning records. Default is
+        0 (no records skipped).
+
+    Returns
+    -------
+    items : list[dict[str, Any]]
+        The nodes in NeDRex returned by the API.
     """
     _check_type(node_type, "node")
 
@@ -228,6 +237,28 @@ def get_nodes(
 def iter_nodes(
     node_type: str, attributes: _Optional[_List[str]] = None, node_ids: _Optional[_List[str]] = None
 ) -> _Generator[_Dict[str, _Any], None, None]:
+    """A function that returns a generator to iterate over nodes
+
+    This function is useful if you wish to get all nodes in a particular
+    collection, but do not want to manually handle offsets and limits.
+
+    Parameters
+    ----------
+    node_type : str
+        The node type to collect
+    attributes : list[str], optional
+        A list of attributes to return for the collected nodes. The
+        default, None, returns all attributes.
+    node_ids : list[str], optional
+        A list of IDs of specific nodes to be returned. The default (None)
+        does no filtering by node ID.
+
+
+    Yields
+    ------
+    doc : dict[str, Any]
+        A node in NeDRex returned by the API
+    """
 
     _check_type(node_type, "node")
     upper_limit = _get_pagination_limit()
@@ -256,11 +287,21 @@ def get_edges(edge_type: str, limit: _Optional[int] = None, offset: _Optional[in
     """
     Returns edges in NeDRex of the given type
 
-        Parameters:
-            edge_type (str): The node type to collect
-            limit (Optional[int]): A limit for the number of records to be returned. The maximum value for this is set
-              by the API.
-            offset (int): The number of records to skip before returning records. Default is 0 (no records skipped).
+    Parameters
+    ----------
+    edge_type : str
+        The edge type to collect
+    limit : int, optional
+        A limit for the number of records to be returned. The default is
+        determined by querying the API.
+    offset : int, optional
+        The number of records to skip before returning records. Default is
+        0 (no records skipped).
+
+    Returns
+    -------
+    items : list[dict[str, Any]]
+        The edges in NeDRex returned by the API.
     """
     _check_type(edge_type, "edge")
 
@@ -273,6 +314,21 @@ def get_edges(edge_type: str, limit: _Optional[int] = None, offset: _Optional[in
 
 @_check_url_base
 def iter_edges(edge_type: str) -> _Generator[_Dict[str, _Any], None, None]:
+    """A function that returns a generator to iterate over edges
+
+    This function is useful if you wish to get all edges in a particular
+    collection, but do not want to manually handle offsets and limits.
+
+    Parameters
+    ----------
+    edge_type : str
+        The edge type to collect
+
+    Yields
+    ------
+    doc : dict[str, Any]
+        An edge in NeDRex returned by the API
+    """
     _check_type(edge_type, "edge")
     upper_limit = _get_pagination_limit()
 

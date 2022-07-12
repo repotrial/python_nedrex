@@ -6,11 +6,6 @@ centrality measure that prioritizes nodes in a network based on the
 lengths of their shortest paths to all other nodes in a network. NeDRex
 implements a modified version where closeness is calulcated with respect
 to selected seeds.
-
-This module contains the following functions
-    * closeness_submit - submits a request to NeDRex to run CC analysis
-    * check_closeness_status - gets details of a submitted CC job
-    * download_closeness_results - downloads results of a completed CC job
 """
 
 from typing import List as _List
@@ -34,7 +29,7 @@ def closeness_submit(
     only_approved_drugs: bool = True,
     N: _Optional[int] = None,  # pylint: disable=C0103
 ) -> str:
-    """submits a request to NeDRex to run closeness centrality analysis
+    """Submit a request to NeDRex to run closeness centrality analysis
 
     Parameters
     ----------
@@ -67,7 +62,7 @@ def closeness_submit(
 
 
 check_closeness_status = _check_status_factory("/closeness/status")
-check_closeness_status.__doc__ = """gets details of a submitted closeness centrality job
+check_closeness_status.__doc__ = """Gets details of a submitted closeness centrality job
 
     Parameters
     ----------
@@ -83,7 +78,7 @@ check_closeness_status.__doc__ = """gets details of a submitted closeness centra
 
 
 def download_closeness_results(uid: str) -> str:
-    """downloads results of a completed closeness centrality job
+    """Downloads results of a completed closeness centrality job
 
     Parameters
     ----------
