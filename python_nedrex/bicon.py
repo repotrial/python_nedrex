@@ -4,7 +4,7 @@
 This module contains the following functions:
     * bicon_request - submits a request to NeDRex to run BiCoN
     * check_bicon_status - gets details of a submitted BiCoN job
-    * download_bicon_data - download results for a submitted BiCoN job
+    * download_bicon_data - download results for a completed BiCoN job
 """
 
 from pathlib import Path as _Path
@@ -85,7 +85,7 @@ def download_bicon_data(uid: str, target: _Optional[str] = None) -> str:
         The unique ID of a BiCoN job
     target: str, optional
         The target file path for the downloaded data. If not specified,
-        this defaults <cwd>/<uid>.zip.
+        this defaults <cwd>/<uid>.zip
 
     Returns
     -------

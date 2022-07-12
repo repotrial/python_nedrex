@@ -33,7 +33,7 @@ def diamond_submit(
     alpha : int, optional
         Weight given to seeds. The default value is 1.
     network : str, optional
-        NeDRexDB-based network to use to DIAMOnD analysis. The defaut
+        NeDRexDB-based network to run DIAMOnD analysis with. The default
         network, `DEFAULT` uses a GGI/PPI network based on experimental
         PPIs.
     edges : str, optional
@@ -65,7 +65,9 @@ def diamond_submit(
 
 
 check_diamond_status = _check_status_factory("/diamond/status")
-check_diamond_status.__doc__ = """Gets details of a submitted DIAMOnD job
+check_diamond_status.__name__ = "check_diamond_status"
+check_diamond_status.__doc__ = """Returns details of a submitted DIAMOnD job
+
     Parameters
     ----------
     uid : str
@@ -74,8 +76,8 @@ check_diamond_status.__doc__ = """Gets details of a submitted DIAMOnD job
     Returns
     -------
     result : dict[str, Any]
-        Details of DIAMOnD job with the given unique ID; the status of the
-        job is stored using the `status` key
+        Details of the DIAMOnD job with the given unique ID; the status of
+        the job is stored using the `status` key
 """
 
 

@@ -62,6 +62,7 @@ def closeness_submit(
 
 
 check_closeness_status = _check_status_factory("/closeness/status")
+check_closeness_status.__name__ = "check_closeness_status"
 check_closeness_status.__doc__ = """Gets details of a submitted closeness centrality job
 
     Parameters
@@ -87,7 +88,7 @@ def download_closeness_results(uid: str) -> str:
 
     Returns
     -------
-    result: str
+    result : str
         A string containing the closeness centrality results
     """
     url = f"{_config.url_base}/closeness/download"

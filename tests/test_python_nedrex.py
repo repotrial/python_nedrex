@@ -48,6 +48,7 @@ from python_nedrex.graph import (
     check_build_status,
     download_graph,
 )
+from python_nedrex.kpm import kpm_submit, check_kpm_status
 from python_nedrex.must import must_request, check_must_status
 from python_nedrex.neo4j import neo4j_query
 from python_nedrex.ppi import ppis
@@ -593,6 +594,18 @@ class TestGraphRoutes:
         uid = "this-is-not-a-valid-uid!"
         with pytest.raises(NeDRexError):
             download_graph(uid)
+
+
+class TestKPMRoutes:
+    def test_simple_request(self, set_base_url, set_api_key):
+        uid = kpm_submit(SEEDS, 10)
+        assert UID_REGEX.match(uid)
+    
+    def test_kpm_status(self, set_base_url, set_api_key):
+        uid = kpm_submit(SEEDS, 10)
+        status = check_kpm_status(uid)
+        assert isinstance(status, dict)
+        assert 'status' in status.keys()
 
 
 class TestMustRoutes:
