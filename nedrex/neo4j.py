@@ -10,9 +10,9 @@ from typing import List as _List
 
 from requests.exceptions import ChunkedEncodingError  # type: ignore
 
-from python_nedrex import config as _config
-from python_nedrex.common import http as _http
-from python_nedrex.exceptions import NeDRexError
+from nedrex import config as _config
+from nedrex.common import http as _http
+from nedrex.exceptions import NeDRexError
 
 
 def neo4j_query(query: str) -> _Generator[_List[_Dict[str, _Any]], None, None]:

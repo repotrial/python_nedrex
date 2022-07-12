@@ -1,9 +1,9 @@
 import os as _os
 from typing import Optional as _Optional
 
-from python_nedrex import config as _config
-from python_nedrex.common import http as _http
-from python_nedrex.decorators import check_url_vpd as _check_url_vpd
+from nedrex import config as _config
+from nedrex.common import http as _http
+from nedrex.decorators import check_url_vpd as _check_url_vpd
 
 
 @_check_url_vpd

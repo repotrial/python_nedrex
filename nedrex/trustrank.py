@@ -1,10 +1,10 @@
 from typing import List as _List
 from typing import Optional as _Optional
 
-from python_nedrex import config as _config
-from python_nedrex.common import check_response as _check_response
-from python_nedrex.common import check_status_factory as _check_status_factory
-from python_nedrex.common import http as _http
+from nedrex import config as _config
+from nedrex.common import check_response as _check_response
+from nedrex.common import check_status_factory as _check_status_factory
+from nedrex.common import http as _http
 
 
 def trustrank_submit(

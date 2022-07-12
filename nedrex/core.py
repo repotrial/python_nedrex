@@ -11,13 +11,13 @@ from typing import List as _List
 from typing import Optional as _Optional
 from typing import cast as _cast
 
-from python_nedrex import config as _config
-from python_nedrex.common import check_pagination_limit as _check_pagination_limit
-from python_nedrex.common import check_response as _check_response
-from python_nedrex.common import get_pagination_limit as _get_pagination_limit
-from python_nedrex.common import http as _http
-from python_nedrex.decorators import check_url_base as _check_url_base
-from python_nedrex.exceptions import NeDRexError as _NeDRexError
+from nedrex import config as _config
+from nedrex.common import check_pagination_limit as _check_pagination_limit
+from nedrex.common import check_response as _check_response
+from nedrex.common import get_pagination_limit as _get_pagination_limit
+from nedrex.common import http as _http
+from nedrex.decorators import check_url_base as _check_url_base
+from nedrex.exceptions import NeDRexError as _NeDRexError
 
 
 def _check_type(coll_name: str, coll_type: str) -> bool:

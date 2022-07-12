@@ -6,8 +6,8 @@ import requests  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3.util.retry import Retry  # type: ignore
 
-from python_nedrex import config
-from python_nedrex.exceptions import ConfigError, NeDRexError
+from nedrex import config
+from nedrex.exceptions import ConfigError, NeDRexError
 
 # Start - code derived from https://findwork.dev/blog/advanced-usage-python-requests-timeouts-retries-hooks/
 DEFAULT_TIMEOUT = 120

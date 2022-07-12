@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Tests for `python_nedrex` package."""
+"""Tests for `nedrex` package."""
 
 from email import quoprimime
 import os
@@ -17,9 +17,9 @@ from more_itertools import take
 import pytest
 import requests
 
-import python_nedrex
-from python_nedrex.common import get_pagination_limit
-from python_nedrex.core import (
+import nedrex
+from nedrex.common import get_pagination_limit
+from nedrex.core import (
     get_edges,
     iter_edges,
     iter_nodes,
@@ -30,29 +30,29 @@ from python_nedrex.core import (
     get_nodes,
     api_keys_active,
 )
-from python_nedrex.diamond import diamond_submit, check_diamond_status, download_diamond_results
-from python_nedrex.disorder import (
+from nedrex.diamond import diamond_submit, check_diamond_status, download_diamond_results
+from nedrex.disorder import (
     get_disorder_ancestors,
     get_disorder_children,
     get_disorder_descendants,
     get_disorder_parents,
     search_by_icd10,
 )
-from python_nedrex.domino import (
+from nedrex.domino import (
     domino_submit,
     check_domino_status
 )
-from python_nedrex.exceptions import ConfigError, NeDRexError
-from python_nedrex.graph import (
+from nedrex.exceptions import ConfigError, NeDRexError
+from nedrex.graph import (
     build_request,
     check_build_status,
     download_graph,
 )
-from python_nedrex.kpm import kpm_submit, check_kpm_status
-from python_nedrex.must import must_request, check_must_status
-from python_nedrex.neo4j import neo4j_query
-from python_nedrex.ppi import ppis
-from python_nedrex.relations import (
+from nedrex.kpm import kpm_submit, check_kpm_status
+from nedrex.must import must_request, check_must_status
+from nedrex.neo4j import neo4j_query
+from nedrex.ppi import ppis
+from nedrex.relations import (
     get_encoded_proteins,
     get_drugs_indicated_for_disorders,
     get_drugs_targetting_proteins,
@@ -114,16 +114,16 @@ UID_REGEX = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
 
 @contextmanager
 def url_base():
-    python_nedrex.config.set_url_base(API_URL)
+    nedrex.config.set_url_base(API_URL)
     yield
-    python_nedrex.config._url_base = None
+    nedrex.config._url_base = None
 
 
 @contextmanager
 def api_key():
-    python_nedrex.config.set_api_key(API_KEY)
+    nedrex.config.set_api_key(API_KEY)
     yield
-    python_nedrex.config._api_key = None
+    nedrex.config._api_key = None
 
 
 @lru_cache(maxsize=10)
@@ -166,7 +166,7 @@ def set_base_url(config):
 
 
 def test_set_api_base(set_base_url):
-    assert python_nedrex.config._url_base == API_URL.rstrip("/")
+    assert nedrex.config._url_base == API_URL.rstrip("/")
 
 
 class TestGetNodeTypes:

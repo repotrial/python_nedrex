@@ -3,9 +3,9 @@ from typing import Iterable as _Iterable
 from typing import List as _List
 from typing import Union as _Union
 
-from python_nedrex import config as _config
-from python_nedrex.common import check_response as _check_response
-from python_nedrex.common import http as _http
+from nedrex import config as _config
+from nedrex.common import check_response as _check_response
+from nedrex.common import http as _http
 
 
 def get_encoded_proteins(gene_list: _Iterable[_Union[int, str]]) -> _Dict[str, _List[str]]:

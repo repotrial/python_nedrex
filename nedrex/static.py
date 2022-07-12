@@ -2,10 +2,10 @@ from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import Optional as _Optional
 
-from python_nedrex import config as _config
-from python_nedrex.common import check_response as _check_response
-from python_nedrex.common import download_file as _download_file
-from python_nedrex.common import http as _http
+from nedrex import config as _config
+from nedrex.common import check_response as _check_response
+from nedrex.common import download_file as _download_file
+from nedrex.common import http as _http
 
 
 def get_metadata() -> _Dict[str, _Any]:

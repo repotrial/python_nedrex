@@ -1,8 +1,8 @@
 from functools import wraps
 from typing import Any, Callable, TypeVar
 
-from python_nedrex import config
-from python_nedrex.exceptions import ConfigError
+from nedrex import config
+from nedrex.exceptions import ConfigError
 
 R = TypeVar("R")
 
