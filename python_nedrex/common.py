@@ -72,13 +72,16 @@ def check_pagination_limit(limit: Optional[int], upper_limit: int) -> None:
 
 
 def download_file(url: str, target: str) -> None:
+    if not url.lower().startswith("http"):
+        raise ValueError(f"{url!r} for download_file must be http(s)")
+
     if config.api_key is not None:
         opener = urllib.request.build_opener()
         opener.addheaders = [("x-api-key", config.api_key)]
         urllib.request.install_opener(opener)
 
     try:
-        urllib.request.urlretrieve(url, target)
+        urllib.request.urlretrieve(url, target)  # nosec
     except urllib.error.HTTPError as err:
         if err.code == 404:
             raise NeDRexError("not found") from err

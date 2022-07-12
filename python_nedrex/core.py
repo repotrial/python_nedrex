@@ -1,6 +1,7 @@
 """Module containing functions relating to the general routes in the NeDRex API
 
-Additionally, this module also contains routes for obtaining API keys.
+This module contains functions that access the general routes, and also routes
+for obtaining API keys.
 """
 
 from typing import Any as _Any
@@ -37,83 +38,143 @@ def _check_type(coll_name: str, coll_type: str) -> bool:
 def api_keys_active() -> bool:
     """Checks whether API keys are active for the instance of NeDRex set in the config
 
-    Returns True if the keys are active, False otherwise
+    Returns
+    -------
+        active: bool
+            True if the API keys are required, otherwise False.
     """
     url = f"{_config.url_base}/api_key_setting"
     response = _http.get(url)
     if response.status_code != 200:
         raise Exception("Unexpected non-200 status code")
-    return _cast(bool, response.json())
+    active = _cast(bool, response.json())
+    return active
 
 
 @_check_url_base
-def get_api_key(*, accept_eula: bool = False) -> _Any:
-    """Obtains a new API key from the NeDRex API.
+def get_api_key(*, accept_eula: bool = False) -> str:
+    """Obtains a new API key for the NeDRex API.
 
-    This function will only return if accept_eula is explicitly set to True
+    Parameters
+    ----------
+        accept_eula : bool
+            Parameter reflecting whether the user of the library accepts
+            the terms of the NeDRex end user licence agreement (EULA).
+            Defaults to False. Must be set to True to acquire an API key.
+
+    Returns
+    -------
+        api_key: str
+            An API key that can be used to access the NeDRex platform.
     """
     if accept_eula is not True:
         raise _NeDRexError("an API key cannot be obtained unless accept_eula is set to True")
 
     url = f"{_config.url_base}/admin/api_key/generate"
     response = _http.post(url, json={"accept_eula": accept_eula})
-    return response.json()
+    api_key = _cast(str, _check_response(response))
+    return api_key
 
 
 @_check_url_base
-def get_node_types() -> _Any:
-    """
-    Returns the list of node types stored in NeDRexDB
+def get_node_types() -> _List[str]:
+    """Gets a list of the node types stored in NeDRexDB
 
-        Returns:
-            node_list (list[str]): List of node types in NeDRex
+    Returns
+    -------
+    node_list: list[str]
+        A list of node types in NeDRexDB
     """
     url: str = f"{_config.url_base}/list_node_collections"
     response = _http.get(url, headers={"x-api-key": _config.api_key})
-    node_list = _check_response(response)
+    node_list = _cast(_List[str], _check_response(response))
     return node_list
 
 
 @_check_url_base
-def get_edge_types() -> _Any:
-    """
-    Returns a list of edge types stored in NeDRexDB
+def get_edge_types() -> _List[str]:
+    """Gets a list of the edge types stored in NeDRexDB
 
-        Returns:
-            edge_list (list[str]): List of edge types in NeDRex
+    Returns
+    -------
+    edge_list: list[str]
+        A list of edge types in NeDRexDB
     """
     url: str = f"{_config.url_base}/list_edge_collections"
     response = _http.get(url, headers={"x-api-key": _config.api_key})
-    edge_list = _check_response(response)
+    edge_list = _cast(_List[str], _check_response(response))
     return edge_list
 
 
 @_check_url_base
 def get_collection_attributes(coll_type: str, include_counts: bool = False) -> _Any:
-    """
-    Retrurns a list of the available attributes stored in NeDRex for the given type
+    """Gets the available attributes in NeDRex for the given type
 
-        Parameters:
-            type (str): The node or edge type to get available attributes for
+    Parameters
+    ----------
+    coll_type: str
+        The name of the collection
+    include_counts: bool, optional
+        If True, returns the counts for each attribute. If False, just
+        returns a list of the attributes. Default is False.
 
-        Returns:
-            attr_list (list[str]): The list of available attributes for the specified node/edge type
+    Returns
+    -------
+    attributes: Union[Dict[str, Any], List[str]]
+        If include_counts is False, this returns a list of the attributes
+        that members of the collections have. If include_counts is true,
+        this returns a dictionary that includes the counts.
+
+    Examples
+    --------
+    >>> get_collection_attributes(protein)
+    ['primaryDomainId',
+     'comments',
+     'created',
+     'dataSources',
+     'displayName',
+     'domainIds',
+     'geneName',
+     'sequence',
+     'synonyms',
+     'taxid',
+     'type',
+     'updated']
+
+    >>> get_collection_attributes(protein, include_counts=True)
+    {'attribute_counts': {'comments': 204906,
+                          'created': 204906,
+                          'dataSources': 204906,
+                          'displayName': 204906,
+                          'domainIds': 204906,
+                          'geneName': 204906,
+                          'primaryDomainId': 204906,
+                          'sequence': 204906,
+                          'synonyms': 204906,
+                          'taxid': 204906,
+                          'type': 204906,
+                          'updated': 204906},
+     'document_count': 204906}
     """
     url: str = f"{_config.url_base}/{coll_type}/attributes"
     response = _http.get(url, headers={"x-api-key": _config.api_key}, params={"include_counts": include_counts})
-    attr_list = _check_response(response)
-    return attr_list
+    attributes = _check_response(response)
+    return attributes
 
 
 @_check_url_base
 def get_node_ids(coll_type: str) -> _Any:
-    """
-    Returns a list of node identifiers in NeDRex for the given type
+    """Returns a list of node identifiers in NeDRex for the given type
 
-        Parameters:
-            type(str): The node type to get IDs for
-        Returns:
-            node_ids (list[str]): The list of available node_ids for the specified node type
+    Parameters
+    ----------
+    coll_type: str
+        The node type to get IDs for
+
+    Returns
+    -------
+    node_ids: list[str]
+        The list of available node IDs for the specificed node type
     """
     _check_type(coll_type, "node")
 
