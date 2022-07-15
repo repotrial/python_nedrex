@@ -8,8 +8,9 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
+      - run:
+          name: Install test deps
+          command: python -m pip install .[test]
       - run:
           name: Run tests
           command: python -m pytest -n 10

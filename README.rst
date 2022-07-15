@@ -20,6 +20,7 @@ The MIT license provided in this repository refers **only** to the Python librar
 Access to the data in an instance of the NeDRex database is licensed separately on a per-instance basis.
 
 * Free software: MIT license
+
 .. * Documentation: https://docs.google.com/document/d/1nUngfKSXkqPi_EPaD9d1w3M0SVAuhj6PY4tRMgA8RMk/edit?usp=sharing
 .. * Documentation: https://python-nedrex.readthedocs.io.
 

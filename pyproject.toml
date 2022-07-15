@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nedrex"
+description = "A Python library for interfacing with the NeDRex API"
+dynamic = ["version", "readme"]
+requires-python = ">=3.6"
+keywords = ["nedrex"]
+license = {text = "MIT"}
+classifiers = [
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+]
+dependencies = [
+    "attrs >= 21.4.0",
+    "requests >= 2.27.1",
+    "cachetools >= 4.2.4",
+    "more-itertools >= 8.13.0",
+]
+
+[project.optional-dependencies]
+lint = [
+    "black >= 22.3.0",
+    "flake8 >= 4.0.1",
+    "pylint >= 2.13.9",
+    "bandit >= 1.7.1",
+]
+test = [
+    "pytest >= 7.0.1",
+    "pytest-xdist >= 2.5.0",
+    ]
+
+[tool.setuptools.dynamic]
+version = {attr = "nedrex.__version__"}
+readme = {file = ["README.rst", "HISTORY.rst"]}
