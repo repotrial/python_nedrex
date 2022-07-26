@@ -8,44 +8,46 @@ Installation
 Stable release
 --------------
 
-To install python-nedrex, run this command in your terminal:
+The nedrex package is available on both `pip` and `conda`.
+
+To install nedrex using `pip`, run the following command in your terminal:
 
 .. code-block:: console
 
-    $ pip install python_nedrex
+    $ pip install nedrex
 
-This is the preferred method to install python-nedrex, as it will always install the most recent stable release.
+This is the preferred method to install nedrex, as the latest stable release is always updated on PyPI first.
+
+Alternatively, if you prefer to use `conda`, run the following command in your terminal:
+
+.. code-block:: console
+
+    $ conda install -c bioconda nedrex
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
 
 .. _pip: https://pip.pypa.io
+.. _conda: https://docs.conda.io/en/latest/
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 
 
-From sources
-------------
+From source
+-----------
 
-The sources for python-nedrex can be downloaded from the `Github repo`_.
+The source code for nedrex can be downloaded from the `Github repo`_.
 
-You can either clone the public repository:
-
-.. code-block:: console
-
-    $ git clone git://github.com/james-skelton/python_nedrex
-
-Or download the `tarball`_:
+This repository can be cloned as follows:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/james-skelton/python_nedrex/tarball/master
+    $ git clone git@github.com:repotrial/python_nedrex.git
 
 Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ pip install .
 
 
-.. _Github repo: https://github.com/james-skelton/python_nedrex
-.. _tarball: https://github.com/james-skelton/python_nedrex/tarball/master
+.. _Github repo: https://github.com/repotrial/python_nedrex 

@@ -1,6 +1,6 @@
-black -l 120 python_nedrex
-isort --profile black python_nedrex
-flake8 --max-line-length=120 python_nedrex
-pylint --max-line-length=120 python_nedrex
-bandit -r python_nedrex
-mypy --strict python_nedrex
+black -l 120 nedrex
+isort --profile black nedrex
+flake8 --max-line-length=120 nedrex
+pylint --max-line-length=120 nedrex
+bandit -r nedrex
+mypy --strict nedrex

@@ -1,9 +1,9 @@
 from typing import List as _List
 
 from nedrex import config as _config
-from nedrex.common import check_response as _check_response
-from nedrex.common import check_status_factory as _check_status_factory
-from nedrex.common import http as _http
+from nedrex._common import check_response as _check_response
+from nedrex._common import check_status_factory as _check_status_factory
+from nedrex._common import http as _http
 
 
 def kpm_submit(seeds: _List[str], k: int, network: str = "DEFAULT") -> str:

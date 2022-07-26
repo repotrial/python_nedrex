@@ -11,7 +11,7 @@ from typing import List as _List
 from requests.exceptions import ChunkedEncodingError  # type: ignore
 
 from nedrex import config as _config
-from nedrex.common import http as _http
+from nedrex._common import http as _http
 from nedrex.exceptions import NeDRexError
 
 

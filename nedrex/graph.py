@@ -5,9 +5,9 @@ from typing import List as _List
 from typing import Optional as _Optional
 
 from nedrex import config as _config
-from nedrex.common import check_response as _check_response
-from nedrex.common import download_file as _download_file
-from nedrex.common import http as _http
+from nedrex._common import check_response as _check_response
+from nedrex._common import download_file as _download_file
+from nedrex._common import http as _http
 
 
 # pylint: disable=R0913

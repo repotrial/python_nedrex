@@ -5,10 +5,10 @@ from typing import List as _List
 from typing import Optional as _Optional
 
 from nedrex import config as _config
-from nedrex.common import check_pagination_limit as _check_pagination_limit
-from nedrex.common import check_response as _check_response
-from nedrex.common import get_pagination_limit as _get_pagination_limit
-from nedrex.common import http as _http
+from nedrex._common import check_pagination_limit as _check_pagination_limit
+from nedrex._common import check_response as _check_response
+from nedrex._common import get_pagination_limit as _get_pagination_limit
+from nedrex._common import http as _http
 
 
 def get_effect_choices() -> _List[str]:

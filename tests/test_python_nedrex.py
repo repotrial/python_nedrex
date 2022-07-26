@@ -2,7 +2,6 @@
 
 """Tests for `nedrex` package."""
 
-from email import quoprimime
 import os
 import re
 from pathlib import Path
@@ -18,7 +17,7 @@ import pytest
 import requests
 
 import nedrex
-from nedrex.common import get_pagination_limit
+from nedrex._common import get_pagination_limit
 from nedrex.core import (
     get_edges,
     iter_edges,

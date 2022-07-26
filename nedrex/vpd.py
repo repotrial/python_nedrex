@@ -2,7 +2,7 @@ import os as _os
 from typing import Optional as _Optional
 
 from nedrex import config as _config
-from nedrex.common import http as _http
+from nedrex._common import http as _http
 from nedrex.decorators import check_url_vpd as _check_url_vpd
 
 

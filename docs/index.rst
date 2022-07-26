@@ -1,4 +1,4 @@
-Welcome to python-nedrex's documentation!
+Welcome to the NeDRex documentation!
 ======================================
 
 .. toctree::
@@ -7,8 +7,7 @@ Welcome to python-nedrex's documentation!
 
    readme
    installation
-   usage
-   modules
+   tutorial
    contributing
    authors
    history

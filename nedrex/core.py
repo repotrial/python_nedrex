@@ -12,10 +12,10 @@ from typing import Optional as _Optional
 from typing import cast as _cast
 
 from nedrex import config as _config
-from nedrex.common import check_pagination_limit as _check_pagination_limit
-from nedrex.common import check_response as _check_response
-from nedrex.common import get_pagination_limit as _get_pagination_limit
-from nedrex.common import http as _http
+from nedrex._common import check_pagination_limit as _check_pagination_limit
+from nedrex._common import check_response as _check_response
+from nedrex._common import get_pagination_limit as _get_pagination_limit
+from nedrex._common import http as _http
 from nedrex.decorators import check_url_base as _check_url_base
 from nedrex.exceptions import NeDRexError as _NeDRexError
 
@@ -74,6 +74,19 @@ def get_api_key(*, accept_eula: bool = False) -> str:
     response = _http.post(url, json={"accept_eula": accept_eula})
     api_key = _cast(str, _check_response(response))
     return api_key
+
+
+@_check_url_base
+def get_pagination_limit() -> int:
+    """Gets the pagination limit for the NeDRexDB instance
+
+    Returns
+    -------
+    limit: int
+        The pagination limit for the NeDRexDB instance
+    """
+    limit: int = _get_pagination_limit()
+    return limit
 
 
 @_check_url_base

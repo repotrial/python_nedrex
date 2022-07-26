@@ -1,10 +1,13 @@
-=============
-python-nedrex
-=============
+======
+NeDRex
+======
 
 
-.. image:: https://img.shields.io/pypi/v/python_nedrex.svg
-        :target: https://pypi.python.org/pypi/python_nedrex
+.. image:: https://img.shields.io/pypi/v/nedrex.svg
+        :target: https://pypi.python.org/pypi/nedrex
+
+.. image:: https://anaconda.org/djskelton/nedrex/badges/installer/conda.svg
+        :target: https://anaconda.org/djskelton/nedrex
 
 .. .. image:: https://img.shields.io/travis/james-skelton/python_nedrex.svg
 ..         :target: https://travis-ci.com/james-skelton/python_nedrex
