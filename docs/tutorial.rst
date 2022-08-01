@@ -94,6 +94,7 @@ For example, the following example uses the :code:`iter_nodes` function to get a
 
 The node routes can optionally take two additional arguments to filter the output.
 The first, :code:`node_ids`, allows you to pass a list of NeDRex node IDs to filter the returned nodes.
+For more information about NeDRex node IDs, see :ref:`nedrex-id-explanation-label`.
 The second, :code:`attributes`, allows you to specify which attributes are retrieved for the returned nodes.
 An example of using these in the previous example to get the :code:`displayName` attribute for paracetamol is as follows::
 
@@ -104,18 +105,32 @@ An example of using these in the previous example to get the :code:`displayName`
         # {'primaryDomainId': 'drugbank.DB00316', 'displayName': 'Acetaminophen'}
 
 
+Node and edge attributes
+========================
+Nodes and edges have attributes that store information about the entity or relationship represented.
+For example, drug nodes have a :code:`displayName` attribute that stores a human-readable name for the drug.
+The attributes available for type can be accessed with the :code:`get_collection_attributes` function::
+
+    from nedrex.core import get_collection_attributes
+
+    print(get_collection_attributes("drug"))
+    # ['primaryDomainId', 'casNumber', 'created', ..., 'updated']
+
+.. _nedrex-id-explanation-label:
+
 ###################
 How NeDRex IDs work
 ###################
+
 Every node in NeDRex has a unique ID attribute, :code:`primaryDomainId`.
 Each of these IDs has the same format, :code:`<database>.<database_id>`.
 In the previous example, the primaryDomainId for the drug paracetamol/acetaminophen is :code:`drugbank.DB00316`.
 In the current version of NeDRex, **with the exception of the signature type, only one data source per type is used for the primaryDomainId**.
 This means, for instance, that :code:`drugbank.` is used to prefix all drugs.
-The table below shows the data source and prefix used for each type in NeDRex (as of 2022-07-26).
+The table below shows the ID data source and prefix used for each type in NeDRex (as of 2022-07-26).
 
 =============== ============================== =================
-type            data source                    prefix
+type            ID data source                 prefix
 =============== ============================== =================
 disorder        MONDO                          :code:`mondo.`
 drug            DrugBank                       :code:`drugbank.`

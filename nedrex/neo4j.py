@@ -25,7 +25,7 @@ def neo4j_query(query: str) -> _Generator[_List[_Dict[str, _Any]], None, None]:
 
     Yields
     ------
-    item : list[dict[str, Any]]
+    list[dict[str, Any]]
         An individual result from the cypher query.
     """
     url = f"{_config.url_base}/neo4j/query"
@@ -38,7 +38,7 @@ def neo4j_query(query: str) -> _Generator[_List[_Dict[str, _Any]], None, None]:
     try:
         for line in resp.iter_lines():
             data = _json.loads(line.decode())
-            for item in data:
-                yield item
+            yield from data
+
     except ChunkedEncodingError as exc:
         raise NeDRexError("cypher query could not be executed") from exc

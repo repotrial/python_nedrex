@@ -21,7 +21,7 @@ def get_encoded_proteins(gene_list: _Iterable[_Union[int, str]]) -> _Dict[str, _
 
     Returns
     -------
-    result : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps gene IDs to lists of encoded proteins.
         It should be noted that genes IDs are convered to string in the
         resultant dictionary, and they *do not* have the `entrez.` prefix.
@@ -58,7 +58,7 @@ def get_drugs_indicated_for_disorders(disorder_list: _Iterable[str]) -> _Dict[st
 
     Returns
     -------
-    result : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps disorder IDs to lists of indicated drugs.
         It should be noted that disorder IDs in the resultant dictionary
         *do not* have the `mondo.` prefix. Additionally, drug IDs *do not*
@@ -92,7 +92,7 @@ def get_drugs_targetting_proteins(protein_list: _Iterable[str]) -> _Dict[str, _L
 
     Returns
     -------
-    result : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps protein IDs to lists of the drugs that
         target them. It should be noted that protein IDs in the resultant
         dictionary *do not* have the `uniprot.` prefix. Additionally, drug
@@ -126,7 +126,7 @@ def get_drugs_targetting_gene_products(gene_list: _Iterable[_Union[int, str]]) -
 
     Returns
     -------
-    result : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps gene IDs to lists of drugs which target
         the protein products of the gene. It should be noted that gene IDs
         are converted to strings in the resultant dictionary, and they

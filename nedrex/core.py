@@ -40,8 +40,8 @@ def api_keys_active() -> bool:
 
     Returns
     -------
-        active: bool
-            True if the API keys are required, otherwise False.
+    bool
+        True if the API keys are required, otherwise False.
     """
     url = f"{_config.url_base}/api_key_setting"
     response = _http.get(url)
@@ -57,15 +57,15 @@ def get_api_key(*, accept_eula: bool = False) -> str:
 
     Parameters
     ----------
-        accept_eula : bool
-            Parameter reflecting whether the user of the library accepts
-            the terms of the NeDRex end user licence agreement (EULA).
-            Defaults to False. Must be set to True to acquire an API key.
+    accept_eula : bool
+        Parameter reflecting whether the user of the library accepts
+        the terms of the NeDRex end user licence agreement (EULA).
+        Defaults to False. Must be set to True to acquire an API key.
 
     Returns
     -------
-        api_key: str
-            An API key that can be used to access the NeDRex platform.
+    str
+        An API key that can be used to access the NeDRex platform.
     """
     if accept_eula is not True:
         raise _NeDRexError("an API key cannot be obtained unless accept_eula is set to True")
@@ -82,7 +82,7 @@ def get_pagination_limit() -> int:
 
     Returns
     -------
-    limit: int
+    int
         The pagination limit for the NeDRexDB instance
     """
     limit: int = _get_pagination_limit()
@@ -95,7 +95,7 @@ def get_node_types() -> _List[str]:
 
     Returns
     -------
-    node_list: list[str]
+    list[str]
         A list of node types in NeDRexDB
     """
     url: str = f"{_config.url_base}/list_node_collections"
@@ -110,7 +110,7 @@ def get_edge_types() -> _List[str]:
 
     Returns
     -------
-    edge_list: list[str]
+    list[str]
         A list of edge types in NeDRexDB
     """
     url: str = f"{_config.url_base}/list_edge_collections"
@@ -133,7 +133,7 @@ def get_collection_attributes(coll_type: str, include_counts: bool = False) -> _
 
     Returns
     -------
-    attributes: Union[Dict[str, Any], List[str]]
+    Union[Dict[str, Any], List[str]]
         If include_counts is False, this returns a list of the attributes
         that members of the collections have. If include_counts is true,
         this returns a dictionary that includes the counts.
@@ -186,7 +186,7 @@ def get_node_ids(coll_type: str) -> _Any:
 
     Returns
     -------
-    node_ids: list[str]
+    list[str]
         The list of available node IDs for the specificed node type
     """
     _check_type(coll_type, "node")
@@ -228,7 +228,7 @@ def get_nodes(
 
     Returns
     -------
-    items : list[dict[str, Any]]
+    list[dict[str, Any]]
         The nodes in NeDRex returned by the API.
     """
     _check_type(node_type, "node")
@@ -269,7 +269,7 @@ def iter_nodes(
 
     Yields
     ------
-    doc : dict[str, Any]
+    dict[str, Any]
         A node in NeDRex returned by the API
     """
 
@@ -286,9 +286,7 @@ def iter_nodes(
         )
 
         data = _check_response(resp)
-
-        for doc in data:
-            yield doc
+        yield from data
 
         if len(data) < upper_limit:
             break
@@ -313,7 +311,7 @@ def get_edges(edge_type: str, limit: _Optional[int] = None, offset: _Optional[in
 
     Returns
     -------
-    items : list[dict[str, Any]]
+    list[dict[str, Any]]
         The edges in NeDRex returned by the API.
     """
     _check_type(edge_type, "edge")
@@ -339,7 +337,7 @@ def iter_edges(edge_type: str) -> _Generator[_Dict[str, _Any], None, None]:
 
     Yields
     ------
-    doc : dict[str, Any]
+    dict[str, Any]
         An edge in NeDRex returned by the API
     """
     _check_type(edge_type, "edge")
@@ -351,8 +349,7 @@ def iter_edges(edge_type: str) -> _Generator[_Dict[str, _Any], None, None]:
         resp = _http.get(f"{_config.url_base}/{edge_type}/all", params=params, headers={"x-api-key": _config.api_key})
         data = _check_response(resp)
 
-        for doc in data:
-            yield doc
+        yield from data
 
         if len(data) < upper_limit:
             break

@@ -16,11 +16,7 @@ from nedrex._common import check_response as _check_response
 from nedrex._common import check_status_factory as _check_status_factory
 from nedrex._common import http as _http
 
-__all__ = [
-    "closeness_submit",
-    "check_closeness_status",
-    "download_closeness_results",
-]
+__all__ = ["closeness_submit", "check_closeness_status", "download_closeness_results"]
 
 
 def closeness_submit(
@@ -36,20 +32,20 @@ def closeness_submit(
     seeds : list[str]
         A list of seed proteins with which to run closeness centrality
         analysis
-    only_direct_drugs: bool, optional
+    only_direct_drugs : bool, optional
         True (default) returns only drugs that target seeds; False
         also includes drugs in the vicinity of seeds
-    only_approved_drugs: bool, optional
+    only_approved_drugs : bool, optional
         True (default) returns only drugs that have an approved use, False
         will also return drugs that are not approved (e.g., experimental)
-    N: int, optional
+    N : int, optional
         The number of drugs to return. If, when ordered by rank, there are
         additional drugs with the same score of the Nth drug, then these
         drugs are also returned.
 
     Returns
     -------
-    uid: str
+    str
         The unique ID of the closness centrality job.
     """
     url = f"{_config.url_base}/closeness/submit"
@@ -72,7 +68,7 @@ check_closeness_status.__doc__ = """Gets details of a submitted closeness centra
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the current closeness centrality job; the status of job
         is stored using the `status` key
 """
@@ -88,7 +84,7 @@ def download_closeness_results(uid: str) -> str:
 
     Returns
     -------
-    result : str
+    str
         A string containing the closeness centrality results
     """
     url = f"{_config.url_base}/closeness/download"

@@ -16,11 +16,7 @@ __all__ = ["diamond_submit", "check_diamond_status", "download_diamond_results"]
 
 
 def diamond_submit(
-    seeds: _List[str],
-    n: int,  # pylint: disable=C0103
-    alpha: int = 1,
-    network: str = "DEFAULT",
-    edges: str = "all",
+    seeds: _List[str], n: int, alpha: int = 1, network: str = "DEFAULT", edges: str = "all"  # pylint: disable=C0103
 ) -> str:
     """Submit a request to NeDRex to run DIAMOnD analysis
 
@@ -44,20 +40,14 @@ def diamond_submit(
 
     Returns
     -------
-    uid : str
+    str
         The unique ID of the DIAMOnD job.
     """
     if edges not in {"limited", "all"}:
         raise ValueError(f"invalid value for argument edges ({edges!r}), should be all|limited")
 
     url = f"{_config.url_base}/diamond/submit"
-    body = {
-        "seeds": seeds,
-        "n": n,
-        "alpha": alpha,
-        "network": network,
-        "edges": edges,
-    }
+    body = {"seeds": seeds, "n": n, "alpha": alpha, "network": network, "edges": edges}
 
     resp = _http.post(url, json=body, headers={"x-api-key": _config.api_key})
     result: str = _check_response(resp)
@@ -75,7 +65,7 @@ check_diamond_status.__doc__ = """Returns details of a submitted DIAMOnD job
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the DIAMOnD job with the given unique ID; the status of
         the job is stored using the `status` key
 """
@@ -91,7 +81,7 @@ def download_diamond_results(uid: str) -> str:
 
     Returns
     -------
-    result : str
+    str
         A string containing the DIAMOnD results
     """
     url = f"{_config.url_base}/diamond/download"

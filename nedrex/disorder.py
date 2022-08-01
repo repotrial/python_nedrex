@@ -44,7 +44,7 @@ search_by_icd10.__doc__ = """Obtains NeDRex disorder nodes by ICD-10 codes
 
     Returns
     -------
-    items : list[dict[str, Any]]
+    list[dict[str, Any]]
         Disorder records from NeDRexDB
 """
 
@@ -60,7 +60,7 @@ get_disorder_descendants.__doc__ = """Returns the ID(s) of nodes that are descen
 
     Returns
     -------
-    items : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps the input terms (in MONDO ID space) to a
         list of their descendants. This means that input IDs in a non
         MONDO namespace will not appear in the result (see example).
@@ -102,7 +102,7 @@ get_disorder_ancestors.__doc__ = """Returns the ID(s) of nodes that are ancestor
 
     Returns
     -------
-    items : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps the input terms (in MONDO ID space) to a
         list of their ancestors. This means that input IDs in a non-MONDO
         namespace will not appear in the result (see example).
@@ -125,7 +125,7 @@ get_disorder_parents.__doc__ = """Returns the ID(s) of nodes that are parents of
 
     Returns
     -------
-    items : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps the input terms (in MONDO ID space) to a
         list of their parents. This means that input IDs in a non-MONDO
         namespace will not appear in the result (see example).
@@ -149,7 +149,7 @@ get_disorder_children.__doc__ = """Returns the ID(s) of nodes that are children 
 
     Returns
     -------
-    items : dict[str, list[str]]
+    dict[str, list[str]]
         A dictionary that maps the input terms (in MONDO ID space) to a
         list of their children. This means that input IDs in a non-MONDO
         namespace will not appear in the result (see example).

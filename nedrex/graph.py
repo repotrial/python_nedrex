@@ -33,11 +33,9 @@ def build_request(
         ["disorder", "drug", "gene", "protein"]
     edges : list[str], optional
         The list of edge types to be included in the graph. The default is
-        ["disorder_is_subtype_of_disorder",
-         "drug_has_indication",
-         "drug_has_target",
-         "protein_encoded_by_gene",
-         "protein_interacts_with_protein",]
+        ["disorder_is_subtype_of_disorder", "drug_has_indication",
+        "drug_has_target", "protein_encoded_by_gene",
+        "protein_interacts_with_protein",]
     ppi_evidence : list[str], optional
         A list of evidence types -- for a PPI edge to be included in the
         graph, it must be asserted with evidence listed in `ppi_evidence`.
@@ -79,7 +77,7 @@ def build_request(
 
     Returns
     -------
-    uid : str
+    str
         The unique ID of the graph build job.
 
     Notes
@@ -140,7 +138,7 @@ def check_build_status(uid: str) -> _Dict[str, _Any]:
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the graph build job with the given unique ID; the
         status of the job is stored using the `status` key
     """
@@ -163,7 +161,7 @@ def download_graph(uid: str, target: _Optional[str] = None) -> str:
 
     Returns
     -------
-    target : str
+    str
         The path to which the downloaded data was saved.
     """
     if target is None:

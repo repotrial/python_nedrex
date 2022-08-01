@@ -15,12 +15,7 @@ from nedrex._common import http as _http
 
 # pylint: disable=R0913
 def must_request(
-    seeds: _List[str],
-    hubpenalty: float,
-    multiple: bool,
-    trees: int,
-    maxit: int,
-    network: str = "DEFAULT",
+    seeds: _List[str], hubpenalty: float, multiple: bool, trees: int, maxit: int, network: str = "DEFAULT"
 ) -> str:
     """Submit a request to a NeDRex instance to run MuST analysis
 
@@ -44,7 +39,7 @@ def must_request(
 
     Returns
     -------
-    uid : str
+    str
         The Unique ID of the MuST job
 
     """
@@ -77,7 +72,7 @@ check_must_status.__doc__ = """Returns details of a submitted MuST job
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the MuST job with the given unique ID; the status of
         the job is stored using the `status` key
 

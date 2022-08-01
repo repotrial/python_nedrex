@@ -8,6 +8,7 @@ Welcome to the NeDRex documentation!
    readme
    installation
    tutorial
+   modules
    contributing
    authors
    history

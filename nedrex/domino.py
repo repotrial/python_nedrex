@@ -26,7 +26,7 @@ def domino_submit(seeds: _List[str], network: str = "DEFAULT") -> str:
 
     Returns
     -------
-    uid : str
+    str
         The unique ID of the DOMINO job.
     """
     url = f"{_config.url_base}/domino/submit"
@@ -48,7 +48,7 @@ check_domino_status.__doc__ = """Returns details of a submitted DOMINO job
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the DOMINO job with the given unique ID; the status of
         the job is stored using the `status` key
 """

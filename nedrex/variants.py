@@ -99,12 +99,7 @@ def get_variant_gene_associations(
     else:
         limit = max_limit
 
-    params = {
-        "variant_id": variant_ids,
-        "gene_id": gene_ids,
-        "offset": offset,
-        "limit": limit,
-    }
+    params = {"variant_id": variant_ids, "gene_id": gene_ids, "offset": offset, "limit": limit}
 
     url = f"{_config.url_base}/variants/get_variant_gene_associations"
     resp = _http.get(url, params=params, headers={"x-api-key": _config.api_key})
@@ -113,18 +108,12 @@ def get_variant_gene_associations(
 
 
 def iter_variant_gene_associations(
-    variant_ids: _Optional[_List[str]] = None,
-    gene_ids: _Optional[_List[str]] = None,
+    variant_ids: _Optional[_List[str]] = None, gene_ids: _Optional[_List[str]] = None
 ) -> _Generator[_Dict[str, _Any], None, None]:
     max_limit = _get_pagination_limit()
     offset = 0
 
-    kwargs = {
-        "variant_ids": variant_ids,
-        "gene_ids": gene_ids,
-        "limit": max_limit,
-        "offset": offset,
-    }
+    kwargs = {"variant_ids": variant_ids, "gene_ids": gene_ids, "limit": max_limit, "offset": offset}
 
     while True:
         results = get_variant_gene_associations(**kwargs)

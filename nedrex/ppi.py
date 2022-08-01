@@ -33,7 +33,7 @@ def ppis(evidence: _Iterable[str], skip: int = 0, limit: _Optional[int] = None) 
 
     Returns
     -------
-    result : list[dict[str, Any]]
+    list[dict[str, Any]]
         A list of PPI edges returned from the NeDRexAPI.
     """
     evidence_set = set(evidence)

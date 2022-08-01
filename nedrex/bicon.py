@@ -19,12 +19,7 @@ from nedrex._common import download_file as _download_file
 from nedrex._common import http as _http
 
 
-def bicon_request(
-    expression_file: _IO[str],
-    lg_min: int = 10,
-    lg_max: int = 15,
-    network: str = "DEFAULT",
-) -> str:
+def bicon_request(expression_file: _IO[str], lg_min: int = 10, lg_max: int = 15, network: str = "DEFAULT") -> str:
     """Submits a request to NeDRex to run BiCoN and returns the job UID
 
     Parameters
@@ -44,7 +39,7 @@ def bicon_request(
 
     Returns
     -------
-    uid : str
+    str
         The unique ID of the submitted BiCoN job
     """
     files = {"expression_file": expression_file}
@@ -59,14 +54,14 @@ def bicon_request(
 def check_bicon_status(uid: str) -> _Dict[str, _Any]:
     """Gets the status of a submitted BiCoN job
 
-    Paramaters
+    Parameters
     ----------
-    uid: str
+    uid : str
         The unique ID of a BiCoN job
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the current BiCoN job; the status of job is stored
         using the `status` key
     """
@@ -81,15 +76,15 @@ def download_bicon_data(uid: str, target: _Optional[str] = None) -> str:
 
     Parameters
     ----------
-    uid: str
+    uid : str
         The unique ID of a BiCoN job
-    target: str, optional
+    target : str, optional
         The target file path for the downloaded data. If not specified,
         this defaults <cwd>/<uid>.zip
 
     Returns
     -------
-    target: str
+    str
         The path to which the downloaded data was saved.
     """
     if target is None:

@@ -22,7 +22,7 @@ def kpm_submit(seeds: _List[str], k: int, network: str = "DEFAULT") -> str:
 
     Returns
     -------
-    uid : str
+    str
         The unique ID of a KPM job.
     """
     url = f"{_config.url_base}/kpm/submit"
@@ -44,7 +44,7 @@ check_kpm_status.__doc__ = """Returns details of a submitted KPM job
 
     Returns
     -------
-    result : dict[str, Any]
+    dict[str, Any]
         Details of the KPM job with the given unique ID; the status of the
         job is stored using the `status` key
 """
