@@ -64,7 +64,7 @@ check_closeness_status.__doc__ = """Gets details of a submitted closeness centra
     Parameters
     ----------
     uid : str
-        The unique ID of a BiCoN job
+        The unique ID of a closeness centrality job
 
     Returns
     -------
@@ -80,7 +80,7 @@ def download_closeness_results(uid: str) -> str:
     Parameters
     ----------
     uid : str
-        The unique ID of a BiCoN job
+        The unique ID of a closeness centrality job
 
     Returns
     -------
