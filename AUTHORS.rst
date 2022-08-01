@@ -10,4 +10,4 @@ Development Lead
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Andreas Maier <andreas.maier-1@uni-hamburg.de>
