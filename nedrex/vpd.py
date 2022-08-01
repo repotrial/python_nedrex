@@ -11,13 +11,19 @@ def get_vpd(disorder: str, number_of_patients: int, out_dir: str) -> _Optional[s
     """
     Downloads a .zip archive with the requested virtual patient data to the given directory.
 
-        Parameters:
-            disorder (str): The disorder mondoID (e.g mondo.0000090) for which the virtual patient should be retrieved.
-            number_of_patients (int): The number of simulated patients in the dataset. Can be 1, 10 or 100.
-            out_dir (str): The absolute path of a directory where the virtual patient data should be stored.
+    Parameters
+    ----------
+    disorder : str
+        The MONDO ID of the disorder (e.g., `mondo.0000090`) for which the virtual patient should be retrieved.
+    number_of_patients : int
+        The number of simulated patients in the dataset. Can be 1, 10, or 100.
+    out_dir : str
+        The absolute path of the directory where the virtual patient data should be stored.
 
-        Returns:
-            archive (str): Absolute path of the downloaded zip archive or None if the requested resource does not exist.
+    Returns
+    -------
+    str, optional
+        Absolute path of the downloaded zip archive or None if the requested resource does not exist.
     """
     archive_name: str = f"{disorder}_1000GP_{number_of_patients}VPSim.zip"
     url: str = f"{_config.url_vpd}/vpd/{disorder}/{archive_name}"
