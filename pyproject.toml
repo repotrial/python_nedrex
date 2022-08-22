@@ -32,6 +32,8 @@ lint = [
     "flake8 >= 4.0.1",
     "pylint >= 2.13.9",
     "bandit >= 1.7.1",
+    "mypy >= 0.971",
+    "types-cachetools >= 5.2.1",
 ]
 test = [
     "pytest >= 7.0.1",
