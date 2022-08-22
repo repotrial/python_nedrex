@@ -29,7 +29,7 @@ from nedrex.core import (
     get_nodes,
     api_keys_active,
 )
-from nedrex.diamond import diamond_submit, check_diamond_status, download_diamond_results
+from nedrex.diamond import diamond_submit, check_diamond_status
 from nedrex.disorder import (
     get_disorder_ancestors,
     get_disorder_children,
@@ -45,7 +45,7 @@ from nedrex.exceptions import ConfigError, NeDRexError
 from nedrex.graph import (
     build_request,
     check_build_status,
-    download_graph,
+    download_graph
 )
 from nedrex.kpm import kpm_submit, check_kpm_status
 from nedrex.must import must_request, check_must_status
@@ -559,36 +559,6 @@ class TestGraphRoutes:
         with pytest.raises(NeDRexError):
             check_build_status(uid)
 
-    def test_download_graph(self, set_base_url, set_api_key):
-        uid = build_request()
-        while True:
-            status = check_build_status(uid)
-            if status["status"] == "completed":
-                break
-            time.sleep(10)
-
-        download_graph(uid)
-        p = Path(f"{uid}.graphml")
-        assert p.exists()
-        p.unlink()
-
-    def test_download_graph_different_dir(self, set_base_url, set_api_key):
-        with tempfile.TemporaryDirectory() as tmpdir:
-
-            uid = build_request()
-            while True:
-                status = check_build_status(uid)
-                if status["status"] == "completed":
-                    break
-                time.sleep(10)
-
-            target = os.path.join(tmpdir, "mygraph.graphml")
-
-            download_graph(uid, target)
-            p = Path(target)
-            assert p.exists()
-            p.unlink()
-
     def test_download_fails_with_invalid_uid(self, set_base_url, set_api_key):
         uid = "this-is-not-a-valid-uid!"
         with pytest.raises(NeDRexError):
@@ -649,17 +619,6 @@ class TestDiamondRoutes:
         status = check_diamond_status(uid)
         assert isinstance(status, dict)
         assert "status" in status.keys()
-
-    def test_diamond_download(self, set_base_url, set_api_key):
-        uid = diamond_submit(SEEDS, 10)
-
-        while True:
-            status = check_diamond_status(uid)
-            if status["status"] == "completed":
-                break
-            time.sleep(10)
-
-        download_diamond_results(uid)
 
     def test_diamond_fails_with_invalid_arguments(self, set_base_url, set_api_key):
         with pytest.raises(ValueError):
