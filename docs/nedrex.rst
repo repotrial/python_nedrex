@@ -20,18 +20,18 @@ nedrex.closeness module
    :undoc-members:
    :show-inheritance:
 
-nedrex.core module
-------------------
+nedrex.comorbiditome module
+---------------------------
 
-.. automodule:: nedrex.core
+.. automodule:: nedrex.comorbiditome
    :members:
    :undoc-members:
    :show-inheritance:
 
-nedrex.decorators module
-------------------------
+nedrex.core module
+------------------
 
-.. automodule:: nedrex.decorators
+.. automodule:: nedrex.core
    :members:
    :undoc-members:
    :show-inheritance:

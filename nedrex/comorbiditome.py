@@ -20,10 +20,28 @@ __all__ = [
     "map_mondo_to_icd10",
     "get_icd10_associations",
     "submit_comorbiditome_build",
+    "check_comorbiditome_status",
+    "download_comorbiditome_build",
 ]
 
 
 def map_icd10_to_mondo(disorders: _List[str]) -> _Dict[str, _List[str]]:
+    """Map a list of disorders in ICD10 to the MONDO namespace
+
+    In moving between ICD10 and MONDO, the scope of the disorder may change. A
+    term in ICD10 may be broader, more specific, or only partially overlap with
+    the scope of a MONDO disorder.
+
+    Parameters
+    ----------
+    disorders : list[str]
+        A list of disorders in the ICD-10 namespace.
+
+    Returns
+    -------
+    dict[str, list[str]]
+        A dictionary mapping input ICD-10 codes to MONDO codes.
+    """
     url = f"{_config.url_base}/comorbiditome/icd10_to_mondo"
 
     params = {"icd10": disorders}
@@ -37,6 +55,26 @@ def map_icd10_to_mondo(disorders: _List[str]) -> _Dict[str, _List[str]]:
 def map_mondo_to_icd10(
     disorders: _List[str], only_3char: bool = False, exclude_3char: bool = False
 ) -> _Dict[str, _List[str]]:
+    """Map a list of disorders in MONDO to the ICD10 namespace
+
+    In moving between MONDO and ICD10, the scope of the disorder may change. A
+    term in MONDO may be broader, more specific, or only partially overlap with
+    the scope of an ICD10 disorder.
+
+    Parameters
+    ----------
+    disorders : list[str]
+        A list of disorders in the MONDO namespace
+    only_3char : bool, optional
+        Whether to only include 3-character ICD-10 codes, by default False
+    exclude_3char : bool, optional
+        Whether to exclude 3-character ICD-10 codes, by default False
+
+    Returns
+    -------
+    dict[str, list[str]]
+        A dictionary mapping input MONDO codes to ICD-10 codes
+    """
     url = f"{_config.url_base}/comorbiditome/mondo_to_icd10"
 
     params = {"mondo": disorders, "only_3char": only_3char, "exclude_3char": exclude_3char}
@@ -56,6 +94,37 @@ _EdgeTypes = Literal[
 
 
 def get_icd10_associations(nodes: _List[str], edge_type: _EdgeTypes) -> _Dict[str, _List[str]]:
+    """Get edge types from NeDRex, with disorder IDs mapped to ICD-10
+
+    This function takes as arguments an `edge_type`, which is a string
+    specifying the edge type of interest, and a list of nodes. `nodes` should
+    contain a list of primary IDs for the nodes of the _non_ disorder type in
+    a relationship that you wish to obtain associations for.
+
+    For example, you could select the `gene_associated_with_disorder` edge type
+    and pass in the CFTR gene as your disorder of interest, `["entrez.1080"]`.
+
+    Note that one edge type, `drug_targets_disorder_associated_gene_product`,
+    is an inferred edge. This follows the path of:
+
+    - `(drug)-[has_target]-(protein)`
+    - `(protein)-[encoded_by]-(gene)`
+    - `(gene)-[associated_with]-(disorder)`
+
+
+    Parameters
+    ----------
+    nodes : list[str]
+        A list of node IDs for the non-disorder member of relationships
+    edge_type : str
+        The edge type you with to obtain relationships for
+
+    Returns
+    -------
+    dict[str, list[str]]
+        A dictionary mapping input nodes to the disorders they have a
+        relationship with (in the ICD-10 namespace).
+    """
     url = f"{_config.url_base}/comorbiditome/get_icd10_associations"
 
     params = {"node": nodes, "edge_type": edge_type}
@@ -73,6 +142,31 @@ def submit_comorbiditome_build(
     min_p_value: _Optional[float] = None,
     mondo: _Optional[list[str]] = None,
 ) -> str:
+    """Submit a comorbiditome build request
+
+    Parameters
+    ----------
+    max_phi_cor : float | None, optional
+        The maximum phi correlation to include an edge in the comorbiditome, by
+        default `None` (no maximum)
+    min_phi_cor : float | None, optional
+        The minimum phi correlation to include an edge in the comorbiditome, by
+        default `None` (no minimum)
+    max_p_value : float | None, optional
+        The maximum p-value to include an edge in the network, by default
+        `None` (no maximum)
+    min_p_value : float | None, optional
+        The minimum p-value to include an edge in the network, by default
+        `None` (no minimum)
+    mondo : list[str] | None, optional
+        MONDO nodes to map to ICD-10 and induce a subnetwork of the
+        comorbiditome, by default `None` (no subnetwork induced)
+
+    Returns
+    -------
+    str
+        UID of the submitted comorbiditome job
+    """
     url = f"{_config.url_base}/comorbiditome/submit_comorbiditome_build"
 
     body = {
@@ -110,6 +204,26 @@ _Formats = Literal["tsv", "graphml"]
 
 
 def download_comorbiditome_build(uid: str, fmt: _Formats, save_path: _Optional[str] = None) -> _Union[str, None]:
+    """Download a completed comorbiditome build
+
+    Parameters
+    ----------
+    uid : str
+        The UID of the comorbiditome build job.
+    fmt : Formats
+        The format to return the comorbiditome in. Should be one of `tsv` or
+        `graphml`.
+    save_path : str | None, optional
+        Where to save the graph. If a string is provided (representing a
+        filepath), then the graph is saved to this file. If `None`, then the
+        graph is returned as a string. Default is `None`.
+
+    Returns
+    -------
+    str | None
+        If `save_path` is set, then `None` is returned. Otherwise, the graph is
+        returned a string.
+    """
     if save_path is None:
         filename = "none.txt"
     else:

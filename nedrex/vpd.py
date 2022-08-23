@@ -3,7 +3,7 @@ from typing import Optional as _Optional
 
 from nedrex import config as _config
 from nedrex._common import http as _http
-from nedrex.decorators import check_url_vpd as _check_url_vpd
+from nedrex._decorators import check_url_vpd as _check_url_vpd
 
 
 @_check_url_vpd

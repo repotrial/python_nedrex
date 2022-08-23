@@ -16,7 +16,7 @@ from nedrex._common import check_pagination_limit as _check_pagination_limit
 from nedrex._common import check_response as _check_response
 from nedrex._common import get_pagination_limit as _get_pagination_limit
 from nedrex._common import http as _http
-from nedrex.decorators import check_url_base as _check_url_base
+from nedrex._decorators import check_url_base as _check_url_base
 from nedrex.exceptions import NeDRexError as _NeDRexError
 
 

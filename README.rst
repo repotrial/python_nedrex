@@ -12,9 +12,9 @@ NeDRex
 .. .. image:: https://img.shields.io/travis/james-skelton/python_nedrex.svg
 ..         :target: https://travis-ci.com/james-skelton/python_nedrex
 
-.. .. image:: https://readthedocs.org/projects/python-nedrex/badge/?version=latest
-..         :target: https://python-nedrex.readthedocs.io/en/latest/?version=latest
-..         :alt: Documentation Status
+.. image:: https://readthedocs.org/projects/python-nedrex/badge/?version=latest
+        :target: https://python-nedrex.readthedocs.io/en/latest/?version=latest
+        :alt: Documentation Status
 
 
 A Python library for interfacing with the NeDRex API.
