@@ -157,7 +157,7 @@ The available, officially supported endpoints are listed in the table below.
 Description      URL                        License
 ===============  ========================== =================
 Open NeDRex      TBD                        TBD
-Licensed NeDRex  http://82.148.225.92:8123/ `NeDRex License`_
+Licensed NeDRex  TBD                        TBD
 ===============  ========================== =================
 
 
