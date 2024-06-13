@@ -54,12 +54,12 @@ from nedrex.ppi import ppis
 from nedrex.relations import (
     get_encoded_proteins,
     get_drugs_indicated_for_disorders,
-    get_drugs_targetting_proteins,
-    get_drugs_targetting_gene_products,
+    get_drugs_targeting_proteins,
+    get_drugs_targeting_gene_products,
 )
 
 
-API_URL = "http://82.148.225.92:8123/"
+API_URL = "https://api.nedrex.net/licensed/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
 
 
@@ -278,7 +278,7 @@ class TestGetNodeRoutes:
         assert isinstance(nodes, list)
         assert len(nodes) == 1
         assert nodes[0] == {
-            "displayName": "disease or disorder",
+            "displayName": "disease",
             "primaryDomainId": "mondo.0000001",
         }
 
@@ -505,7 +505,7 @@ class TestRelationshipRoutes:
         assert "DB00437" in results["0005393"]  # Allopurinol for gout
         assert "DB00203" in results["0005362"]  # Sildenafil for ED
 
-    def test_get_drugs_targetting_proteins(self, set_base_url, set_api_key):
+    def test_get_drugs_targeting_proteins(self, set_base_url, set_api_key):
         # NOTE: If result changes, check these examples are still accurate.
 
         proteins = [
@@ -513,19 +513,19 @@ class TestRelationshipRoutes:
             "uniprot.P03372",  # Estrogen receptor α, targetted by ethinylestradiol
         ]
 
-        results = get_drugs_targetting_proteins(proteins)
+        results = get_drugs_targeting_proteins(proteins)
 
         assert "DB00341" in results["P35367"]
         assert "DB00977" in results["P03372"]
 
-    def test_get_drugs_targetting_gene_products(self, set_base_url, set_api_key):
+    def test_get_drugs_targeting_gene_products(self, set_base_url, set_api_key):
         genes = [
             "entrez.3269",  # HRH1 gene (product targetted by antihistamines)
             2099,  # Estrogen receptor α gene (product targetted by ethinylestradiol)
             "6532",  # SLC6A4, encodes Sodium-dependent serotonin transporter, targetted by SSRIs
         ]
 
-        results = get_drugs_targetting_gene_products(genes)
+        results = get_drugs_targeting_gene_products(genes)
 
         assert "DB00341" in results["3269"]
         assert "DB00977" in results["2099"]
@@ -569,7 +569,7 @@ class TestKPMRoutes:
     def test_simple_request(self, set_base_url, set_api_key):
         uid = kpm_submit(SEEDS, 10)
         assert UID_REGEX.match(uid)
-    
+
     def test_kpm_status(self, set_base_url, set_api_key):
         uid = kpm_submit(SEEDS, 10)
         status = check_kpm_status(uid)
@@ -629,7 +629,7 @@ class TestDominoRoutes:
     def test_simple_request(self, set_base_url, set_api_key):
         uid = domino_submit(SEEDS)
         assert UID_REGEX.match(uid)
-    
+
     def test_check_domino_status(self, set_base_url, set_api_key):
         uid = domino_submit(SEEDS)
         status = check_domino_status(uid)

@@ -41,7 +41,7 @@ def get_encoded_proteins(gene_list: _Iterable[_Union[int, str]]) -> _Dict[str, _
             genes.append(gene)
 
     url = f"{_config.url_base}/relations/get_encoded_proteins"
-    resp = _http.get(url, params={"gene": genes}, headers={"x-api-key": _config.api_key})
+    resp = _http.post(url, json={"nodes": genes}, headers={"x-api-key": _config.api_key})
     result: _Dict[str, _List[str]] = _check_response(resp)
     return result
 
@@ -75,12 +75,12 @@ def get_drugs_indicated_for_disorders(disorder_list: _Iterable[str]) -> _Dict[st
             disorders.append(f"mondo.{disorder}")
 
     url = f"{_config.url_base}/relations/get_drugs_indicated_for_disorders"
-    resp = _http.get(url, params={"disorder": disorders}, headers={"x-api-key": _config.api_key})
+    resp = _http.post(url, json={"nodes": disorders}, headers={"x-api-key": _config.api_key})
     result: _Dict[str, _List[str]] = _check_response(resp)
     return result
 
 
-def get_drugs_targetting_proteins(protein_list: _Iterable[str]) -> _Dict[str, _List[str]]:
+def get_drugs_targeting_proteins(protein_list: _Iterable[str]) -> _Dict[str, _List[str]]:
     """Gets drugs that target proteins in a supplied protein list
 
     Parameters
@@ -108,13 +108,13 @@ def get_drugs_targetting_proteins(protein_list: _Iterable[str]) -> _Dict[str, _L
         else:
             proteins.append(f"uniprot.{protein}")
 
-    url = f"{_config.url_base}/relations/get_drugs_targetting_proteins"
-    resp = _http.get(url, params={"protein": proteins}, headers={"x-api-key": _config.api_key})
+    url = f"{_config.url_base}/relations/get_drugs_targeting_proteins"
+    resp = _http.post(url, json={"nodes": proteins}, headers={"x-api-key": _config.api_key})
     result: _Dict[str, _List[str]] = _check_response(resp)
     return result
 
 
-def get_drugs_targetting_gene_products(gene_list: _Iterable[_Union[int, str]]) -> _Dict[str, _List[str]]:
+def get_drugs_targeting_gene_products(gene_list: _Iterable[_Union[int, str]]) -> _Dict[str, _List[str]]:
     """Get drugs that target the products of genes in a supplied gene list
 
     Parameters
@@ -146,7 +146,7 @@ def get_drugs_targetting_gene_products(gene_list: _Iterable[_Union[int, str]]) -
         else:
             genes.append(gene)
 
-    url = f"{_config.url_base}/relations/get_drugs_targetting_gene_products"
-    resp = _http.get(url, params={"gene": genes}, headers={"x-api-key": _config.api_key})
+    url = f"{_config.url_base}/relations/get_drugs_targeting_gene_products"
+    resp = _http.post(url, json={"nodes": genes}, headers={"x-api-key": _config.api_key})
     result: _Dict[str, _List[str]] = _check_response(resp)
     return result
