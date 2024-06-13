@@ -454,7 +454,7 @@ class TestPPIRoute:
         ppis(["exp"], 0, get_pagination_limit(), [False], 1000, 800)
 
     def test_overlap_with_pagination(self, set_base_url, set_api_key):
-        page_limit = 1_0
+        page_limit = 1_000
         delta = page_limit // 2
         skip = delta
 
