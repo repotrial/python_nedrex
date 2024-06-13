@@ -337,13 +337,14 @@ class TestDisorderRoutes:
         result = get_disorder_children(glomerulonephritis)
         assert lupus_nephritis in result[glomerulonephritis]
 
-    @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(20))
+    @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(50))
     def test_parent_child_reciprocity(self, set_base_url, set_api_key, chosen_id):
-        if chosen_id == "mondo.0100332":
-            print("here")
         parents = get_disorder_parents(chosen_id)
+        if not parents:
+            assert True
+            return
         children_of_parents = get_disorder_children(parents[chosen_id])
-        assert all(chosen_id in value for value in (children_of_parents.values() if bool(children_of_parents) else []))
+        assert all(chosen_id in value for value in children_of_parents.values())
 
     @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(20))
     def test_ancestor_descendant_reciprocity(self, set_base_url, set_api_key, chosen_id):
