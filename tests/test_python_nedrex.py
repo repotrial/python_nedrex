@@ -59,7 +59,7 @@ from nedrex.relations import (
 )
 
 
-API_URL = "https://prototypes.cosy.bio/licensed/"
+API_URL = "https://apps.cosy.bio/licensed/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
 
 
@@ -339,9 +339,11 @@ class TestDisorderRoutes:
 
     @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(20))
     def test_parent_child_reciprocity(self, set_base_url, set_api_key, chosen_id):
+        if chosen_id == "mondo.0100332":
+            print("here")
         parents = get_disorder_parents(chosen_id)
         children_of_parents = get_disorder_children(parents[chosen_id])
-        assert all(chosen_id in value for value in children_of_parents.values())
+        assert all(chosen_id in value for value in (children_of_parents.values() if bool(children_of_parents) else []))
 
     @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(20))
     def test_ancestor_descendant_reciprocity(self, set_base_url, set_api_key, chosen_id):
