@@ -15,7 +15,9 @@ from nedrex._common import http as _http
 from nedrex.exceptions import NeDRexError
 
 
-def ppis(evidence: _Iterable[str], skip: int = 0, limit: _Optional[int] = None) -> _List[_Dict[str, _Any]]:
+def ppis(evidence: _Iterable[str], skip: int = 0, limit: _Optional[int] = None,
+         reviewed_proteins: _Iterable[bool] = [True, False], skip_proteins: _Optional[int] = 0,
+         limit_proteins: _Optional[int] = 250_000) -> _List[_Dict[str, _Any]]:
     """Obtain PPIs from a NeDRex instance
 
     Parameters
@@ -30,7 +32,12 @@ def ppis(evidence: _Iterable[str], skip: int = 0, limit: _Optional[int] = None) 
     limit : int, optional
         The number of records to return. The default value, None, uses the
         maximum pagination limit for the NeDRex instance being queried.
-
+    reviewed_proteins: iterable[str], optional
+       Protein reviewed state according to UniProt for proteins to be included in the returned PPIs.
+    skip_proteins: int, optional
+        The number of proteins to skip before returning PPIs. The default value is 0 (skip no records).
+    limit_proteins: int, optional
+        The number of proteins to return, in order of precedence. The default value is 250000 (all proteins).
     Returns
     -------
     list[dict[str, Any]]
@@ -44,8 +51,10 @@ def ppis(evidence: _Iterable[str], skip: int = 0, limit: _Optional[int] = None) 
     maximum_limit = _get_pagination_limit()
     _check_pagination_limit(limit, maximum_limit)
 
-    params = {"iid_evidence": list(evidence_set), "skip": skip, "limit": limit}
+    params = {"iid_evidence": list(evidence_set), "skip": skip, "limit": limit
+         , "reviewed_proteins": reviewed_proteins, "skip_proteins": skip_proteins, "limit_proteins": limit_proteins
+              }
 
-    resp = _http.get(f"{_config.url_base}/ppi", params=params, headers={"x-api-key": _config.api_key})
+    resp = _http.post(f"{_config.url_base}/ppi", json=params, headers={"x-api-key": _config.api_key})
     result: _List[_Dict[str, _Any]] = _check_response(resp)
     return result

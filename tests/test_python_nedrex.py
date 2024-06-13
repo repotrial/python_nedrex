@@ -59,7 +59,7 @@ from nedrex.relations import (
 )
 
 
-API_URL = "https://api.nedrex.net/licensed/"
+API_URL = "https://prototypes.cosy.bio/licensed/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
 
 
@@ -445,10 +445,16 @@ class TestRoutesFailWithoutAPIKey:
 
 class TestPPIRoute:
     def test_ppi_route(self, set_base_url, set_api_key):
-        ppis(["exp"], 0, get_pagination_limit())
+        assert len(ppis(["exp"], 0, get_pagination_limit())) == get_pagination_limit()
+
+    def test_ppi_route_reviewed_filter_true(self, set_base_url, set_api_key):
+        ppis(["exp"], 0, get_pagination_limit(), [True], 1000, 800)
+
+    def test_ppi_route_reviewed_filter_false(self, set_base_url, set_api_key):
+        ppis(["exp"], 0, get_pagination_limit(), [False], 1000, 800)
 
     def test_overlap_with_pagination(self, set_base_url, set_api_key):
-        page_limit = 1_000
+        page_limit = 1_0
         delta = page_limit // 2
         skip = delta
 
