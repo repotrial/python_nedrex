@@ -58,6 +58,7 @@ from nedrex.relations import (
     get_drugs_targeting_gene_products,
 )
 
+from nedrex.static import (get_metadata)
 
 API_URL = "https://api.nedrex.net/licensed/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
@@ -755,3 +756,12 @@ class TestNeo4j:
         with pytest.raises(NeDRexError):
             for _ in neo4j_query(query):
                 pass
+
+
+class TestStaticRoutes:
+   # @lru_cache(maxsize=10)
+    def test_metadata(self, set_base_url, set_api_key):
+        metadata = get_metadata()
+        print(f"\n\n{metadata}")
+        assert type(metadata) == dict
+        assert "version" in metadata.keys()
