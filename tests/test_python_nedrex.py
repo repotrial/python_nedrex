@@ -762,6 +762,12 @@ class TestStaticRoutes:
    # @lru_cache(maxsize=10)
     def test_metadata(self, set_base_url, set_api_key):
         metadata = get_metadata()
-        print(f"\n\n{metadata}")
         assert type(metadata) == dict
         assert "version" in metadata.keys()
+
+    def test_source_db_contains_metadata(self, set_base_url, set_api_key):
+        metadata = get_metadata()
+        assert type(metadata) == dict
+        assert len(metadata["source_databases"].keys()) > 0
+        for db in metadata["source_databases"].keys():
+            assert metadata["source_databases"][db]["version"] is not None
