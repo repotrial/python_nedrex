@@ -60,9 +60,9 @@ from nedrex.relations import (
 
 from nedrex.static import (get_metadata)
 
-API_URL = "https://api.nedrex.net/licensed/"
+API_URL = "https://dev.api.nedrex.net/open/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
-MODE_OPEN = False
+MODE_OPEN = "open" in API_URL
 
 
 SEEDS = [
@@ -134,6 +134,8 @@ def get_node_collections():
     return collections
 
 
+
+
 @lru_cache(maxsize=10)
 def get_edge_collections():
     with api_key(), url_base():
@@ -148,6 +150,27 @@ def get_random_disorder_selection(n, skip_root=True):
     disorder_ids.remove("mondo.0000001")
     return random.sample(sorted(disorder_ids), n)
 
+
+def api_to_neo4j_collection_name(collection):
+    if collection == "go":
+        return "GO"
+    indexes = [0]
+    curr_idx = 0
+    while curr_idx < len(collection):
+        try:
+            curr_idx = collection.index("_", curr_idx) + 1
+            if curr_idx == 0:
+                break
+            if curr_idx < len(collection) + 1:
+                indexes.append(curr_idx)
+        except ValueError:
+            break
+    for idx in indexes:
+        if idx == 0:
+            collection = collection[idx].upper() + collection[idx + 1:]
+        else:
+            collection = collection[:idx - 1] + collection[idx].upper() + collection[idx + 1:]
+    return collection
 
 @pytest.fixture
 def config():
@@ -757,6 +780,18 @@ class TestNeo4j:
             for _ in neo4j_query(query):
                 pass
 
+    @pytest.mark.parametrize("collection", get_node_collections())
+    def test_node_unique_constraints(self, set_base_url, set_api_key, collection):
+        skip = {"genomic_variant"}
+        if collection in skip:
+            assert True
+            return
+        neo4j_collection = api_to_neo4j_collection_name(collection)
+        query = f"SHOW CONSTRAINTS WHERE '{neo4j_collection}' IN labelsOrTypes AND 'primaryDomainId' IN properties AND type IN ['NODE_KEY', 'UNIQUENESS'];"
+        res = neo4j_query(query)
+        assert res is not None and len([i for i in res]) == 1
+
+
 
 class TestStaticRoutes:
    # @lru_cache(maxsize=10)
@@ -771,3 +806,32 @@ class TestStaticRoutes:
         assert len(metadata["source_databases"].keys()) > 0
         for db in metadata["source_databases"].keys():
             assert metadata["source_databases"][db]["version"] is not None
+
+class TestEmbeddings:
+
+
+    def test_created_indexes(self, set_base_url, set_api_key):
+        query = """
+        SHOW VECTOR INDEX
+        """
+        res = neo4j_query(query)
+        assert len({i[1] for i in res}) == 22
+        assert all(i[3] == 100.0 and i[2] == "ONLINE" for i in res)
+
+
+    def test_embeddings_not_empty(self, set_base_url, set_api_key):
+        query = """
+                SHOW VECTOR INDEX
+                """
+        res = neo4j_query(query)
+        entity_names = [(i[6][0], i[5]) for i in res]
+        nodes = [n for n,k in entity_names if k=="NODE"]
+        edges = [n for n, k in entity_names if k == "RELATIONSHIP"]
+
+        for node in nodes:
+            query = f"MATCH (n:{node}) RETURN n.embedding LIMIT 25"
+            assert all(i[0] is not None and not all(j == 0.0  for j in i[0]) for i in neo4j_query(query)), f"Broken embedding for {node}"
+
+        for edge in edges:
+            query = f"MATCH ()-[n:{edge}]-() RETURN n.embedding LIMIT 25"
+            assert all(i[0] is not None and not all(j == 0.0  for j in i[0]) for i in neo4j_query(query)), f"Broken embedding for {edge}"
