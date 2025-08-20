@@ -60,7 +60,7 @@ from nedrex.relations import (
 
 from nedrex.static import (get_metadata)
 
-API_URL = "https://dev.api.nedrex.net/open/"
+API_URL = "https://dev.api.nedrex.net/licensed/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
 MODE_OPEN = "open" in API_URL
 
@@ -171,6 +171,27 @@ def api_to_neo4j_collection_name(collection):
         else:
             collection = collection[:idx - 1] + collection[idx].upper() + collection[idx + 1:]
     return collection
+
+
+def get_embedding_nodes():
+    query = """
+                    SHOW VECTOR INDEX
+                    """
+    with api_key(), url_base():
+        res = neo4j_query(query)
+        entity_names = [(i[6][0], i[5]) for i in res]
+        return [n for n, k in entity_names if k == "NODE"]
+
+
+def get_embedding_edges():
+    query = """
+                    SHOW VECTOR INDEX
+                    """
+    with api_key(), url_base():
+        res = neo4j_query(query)
+        entity_names = [(i[6][0], i[5]) for i in res]
+        return [n for n, k in entity_names if k == "RELATIONSHIP"]
+
 
 @pytest.fixture
 def config():
@@ -819,19 +840,18 @@ class TestEmbeddings:
         assert all(i[3] == 100.0 and i[2] == "ONLINE" for i in res)
 
 
-    def test_embeddings_not_empty(self, set_base_url, set_api_key):
-        query = """
-                SHOW VECTOR INDEX
-                """
-        res = neo4j_query(query)
-        entity_names = [(i[6][0], i[5]) for i in res]
-        nodes = [n for n,k in entity_names if k=="NODE"]
-        edges = [n for n, k in entity_names if k == "RELATIONSHIP"]
 
-        for node in nodes:
-            query = f"MATCH (n:{node}) RETURN n.embedding LIMIT 25"
-            assert all(i[0] is not None and not all(j == 0.0  for j in i[0]) for i in neo4j_query(query)), f"Broken embedding for {node}"
 
-        for edge in edges:
-            query = f"MATCH ()-[n:{edge}]-() RETURN n.embedding LIMIT 25"
-            assert all(i[0] is not None and not all(j == 0.0  for j in i[0]) for i in neo4j_query(query)), f"Broken embedding for {edge}"
+    @pytest.mark.parametrize("node", get_embedding_nodes())
+    def test_node_embeddings_not_empty(self, set_base_url, set_api_key, node):
+
+        query = f"MATCH (n:{node}) RETURN n.embedding LIMIT 25"
+        assert all(i[0] is not None and not all(j == 0.0  for j in i[0]) for i in neo4j_query(query)), f"Broken embedding for {node}"
+
+
+    @pytest.mark.parametrize("edge", get_embedding_edges())
+    def test_edge_embeddings_not_empty(self, set_base_url, set_api_key, edge):
+
+        query = f"MATCH ()-[n:{edge}]-() RETURN n.embedding LIMIT 25"
+        assert all(i[0] is not None and not all(j == 0.0 for j in i[0]) for i in neo4j_query(query)), f"Broken embedding for {edge}"
+
