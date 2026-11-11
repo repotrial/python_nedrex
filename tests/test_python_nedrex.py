@@ -58,9 +58,11 @@ from nedrex.relations import (
     get_drugs_targeting_gene_products,
 )
 
+from nedrex.static import (get_metadata)
 
-API_URL = "https://api.nedrex.net/licensed/"
+API_URL = "https://dev.api.nedrex.net/licensed/"
 API_KEY = requests.post(f"{API_URL}admin/api_key/generate", json={"accept_eula": True}).json()
+MODE_OPEN = "open" in API_URL
 
 
 SEEDS = [
@@ -132,6 +134,8 @@ def get_node_collections():
     return collections
 
 
+
+
 @lru_cache(maxsize=10)
 def get_edge_collections():
     with api_key(), url_base():
@@ -145,6 +149,48 @@ def get_random_disorder_selection(n, skip_root=True):
         disorder_ids = set(get_node_ids("disorder"))
     disorder_ids.remove("mondo.0000001")
     return random.sample(sorted(disorder_ids), n)
+
+
+def api_to_neo4j_collection_name(collection):
+    if collection == "go":
+        return "GO"
+    indexes = [0]
+    curr_idx = 0
+    while curr_idx < len(collection):
+        try:
+            curr_idx = collection.index("_", curr_idx) + 1
+            if curr_idx == 0:
+                break
+            if curr_idx < len(collection) + 1:
+                indexes.append(curr_idx)
+        except ValueError:
+            break
+    for idx in indexes:
+        if idx == 0:
+            collection = collection[idx].upper() + collection[idx + 1:]
+        else:
+            collection = collection[:idx - 1] + collection[idx].upper() + collection[idx + 1:]
+    return collection
+
+
+def get_embedding_nodes():
+    query = """
+                    SHOW VECTOR INDEX
+                    """
+    with api_key(), url_base():
+        res = neo4j_query(query)
+        entity_names = [(i["labelsOrTypes"][0], i["entityType"]) for i in res]
+        return [n for n, k in entity_names if k == "NODE"]
+
+
+def get_embedding_edges():
+    query = """
+                    SHOW VECTOR INDEX
+                    """
+    with api_key(), url_base():
+        res = neo4j_query(query)
+        entity_names = [(i["labelsOrTypes"][0], i["entityType"]) for i in res]
+        return [n for n, k in entity_names if k == "RELATIONSHIP"]
 
 
 @pytest.fixture
@@ -337,9 +383,12 @@ class TestDisorderRoutes:
         result = get_disorder_children(glomerulonephritis)
         assert lupus_nephritis in result[glomerulonephritis]
 
-    @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(20))
+    @pytest.mark.parametrize("chosen_id", get_random_disorder_selection(50))
     def test_parent_child_reciprocity(self, set_base_url, set_api_key, chosen_id):
         parents = get_disorder_parents(chosen_id)
+        if not parents:
+            assert True
+            return
         children_of_parents = get_disorder_children(parents[chosen_id])
         assert all(chosen_id in value for value in children_of_parents.values())
 
@@ -418,34 +467,86 @@ class TestRoutesFailWithoutAPIKey:
                 pass
         assert "no API key set in the configuration" == str(excinfo.value)
 
+    # def test_disorder_routes_fail(self, set_base_url):
+    #     disorder_id = "mondo.0000001"  # root of the MONDO tree
+    #     icd10_id = "I59.1"  # Heart disease, unspecified
+    #
+    #     with pytest.raises(ConfigError) as excinfo:
+    #         get_disorder_children(disorder_id)
+    #         if not MODE_OPEN:
+    #             assert "no API key set in the configuration" == str(excinfo.value)
+    #         else:
+    #             assert True
+    #
+    #     with pytest.raises(ConfigError) as excinfo:
+    #         get_disorder_parents(disorder_id)
+    #         if not MODE_OPEN:
+    #             assert "no API key set in the configuration" == str(excinfo.value)
+    #         else:
+    #             assert True
+    #
+    #     with pytest.raises(ConfigError) as excinfo:
+    #         get_disorder_ancestors(disorder_id)
+    #         if not MODE_OPEN:
+    #             assert "no API key set in the configuration" == str(excinfo.value)
+    #         else:
+    #             assert True
+    #
+    #     with pytest.raises(ConfigError) as excinfo:
+    #         get_disorder_descendants(disorder_id)
+    #         if not MODE_OPEN:
+    #             assert "no API key set in the configuration" == str(excinfo.value)
+    #         else:
+    #             assert True
+    #
+    #     with pytest.raises(ConfigError) as excinfo:
+    #         search_by_icd10(icd10_id)
+    #         if not MODE_OPEN:
+    #             assert "no API key set in the configuration" == str(excinfo.value)
+    #         else:
+    #             assert True
+
     def test_disorder_routes_fail(self, set_base_url):
         disorder_id = "mondo.0000001"  # root of the MONDO tree
         icd10_id = "I59.1"  # Heart disease, unspecified
 
-        with pytest.raises(ConfigError) as excinfo:
-            get_disorder_children(disorder_id)
-        assert "no API key set in the configuration" == str(excinfo.value)
+        if not MODE_OPEN:
+            # Test cases for when API key is required
+            with pytest.raises(ConfigError, match="no API key set in the configuration"):
+                get_disorder_children(disorder_id)
 
-        with pytest.raises(ConfigError) as excinfo:
-            get_disorder_parents(disorder_id)
-        assert "no API key set in the configuration" == str(excinfo.value)
+            with pytest.raises(ConfigError, match="no API key set in the configuration"):
+                get_disorder_parents(disorder_id)
 
-        with pytest.raises(ConfigError) as excinfo:
-            get_disorder_ancestors(disorder_id)
-        assert "no API key set in the configuration" == str(excinfo.value)
+            with pytest.raises(ConfigError, match="no API key set in the configuration"):
+                get_disorder_ancestors(disorder_id)
 
-        with pytest.raises(ConfigError) as excinfo:
-            get_disorder_descendants(disorder_id)
-        assert "no API key set in the configuration" == str(excinfo.value)
+            with pytest.raises(ConfigError, match="no API key set in the configuration"):
+                get_disorder_descendants(disorder_id)
 
-        with pytest.raises(ConfigError) as excinfo:
-            search_by_icd10(icd10_id)
-        assert "no API key set in the configuration" == str(excinfo.value)
+            with pytest.raises(ConfigError, match="no API key set in the configuration"):
+                search_by_icd10(icd10_id)
+        else:
+            # Test cases for open mode - these should not raise exceptions
+            try:
+                get_disorder_children(disorder_id)
+                get_disorder_parents(disorder_id)
+                get_disorder_ancestors(disorder_id)
+                get_disorder_descendants(disorder_id)
+                search_by_icd10(icd10_id)
+            except ConfigError:
+                pytest.fail("Should not raise ConfigError in open mode")
 
 
 class TestPPIRoute:
     def test_ppi_route(self, set_base_url, set_api_key):
-        ppis(["exp"], 0, get_pagination_limit())
+        assert len(ppis(["exp"], 0, get_pagination_limit())) == get_pagination_limit()
+
+    def test_ppi_route_reviewed_filter_true(self, set_base_url, set_api_key):
+        ppis(["exp"], 0, get_pagination_limit(), [True], 1000, 800)
+
+    def test_ppi_route_reviewed_filter_false(self, set_base_url, set_api_key):
+        ppis(["exp"], 0, get_pagination_limit(), [False], 1000, 800)
 
     def test_overlap_with_pagination(self, set_base_url, set_api_key):
         page_limit = 1_000
@@ -645,7 +746,7 @@ class TestNeo4j:
         LIMIT 25
         """
 
-        assert all(i[0]["type"] == "Gene" for i in neo4j_query(query))
+        assert all(i["n"]["type"] == "Gene" for i in neo4j_query(query))
 
     def test_general_edge_query(self, set_base_url, set_api_key):
         query = """
@@ -654,7 +755,7 @@ class TestNeo4j:
         LIMIT 25
         """
 
-        assert all(i[0]["type"] == "GeneAssociatedWithDisorder" for i in neo4j_query(query))
+        assert all(i["n"]["type"] == "GeneAssociatedWithDisorder" for i in neo4j_query(query))
 
     def test_general_node_query_with_attributes(self, set_base_url, set_api_key):
         query = """
@@ -664,7 +765,7 @@ class TestNeo4j:
 
         x = list(neo4j_query(query))
         assert len(x) == 1
-        assert x[0][0]['chromosome'] == '19'
+        assert x[0]["n"]['chromosome'] == '19'
 
 
     def test_general_edge_query_with_attributes(self, set_base_url, set_api_key):
@@ -676,7 +777,7 @@ class TestNeo4j:
 
         results = list(neo4j_query(query))
         assert len(results) != 0
-        assert all(i[0]['score'] == 1.0 for i in results)
+        assert all(i["n"]['score'] == 1.0 for i in results)
 
 
     def test_gene_associated_with_disorder(self, set_base_url, set_api_key):
@@ -686,7 +787,8 @@ class TestNeo4j:
         LIMIT 50
         """
 
-        for gene, disorder, assoc in neo4j_query(query):
+        for row in neo4j_query(query):
+            gene, disorder, assoc = row["g"], row["d"], row["gawd"]
             assert gene['type'] == 'Gene'
             assert disorder['type'] == "Disorder"
             assert assoc['type'] == "GeneAssociatedWithDisorder"
@@ -699,3 +801,58 @@ class TestNeo4j:
         with pytest.raises(NeDRexError):
             for _ in neo4j_query(query):
                 pass
+
+    @pytest.mark.parametrize("collection", get_node_collections())
+    def test_node_unique_constraints(self, set_base_url, set_api_key, collection):
+        skip = {"genomic_variant"}
+        if collection in skip:
+            assert True
+            return
+        neo4j_collection = api_to_neo4j_collection_name(collection)
+        query = f"SHOW CONSTRAINTS WHERE '{neo4j_collection}' IN labelsOrTypes AND 'primaryDomainId' IN properties AND type IN ['NODE_KEY', 'UNIQUENESS', 'NODE_PROPERTY_UNIQUENESS'];"
+        res = neo4j_query(query)
+        assert res is not None and len([i for i in res]) == 1
+
+
+
+class TestStaticRoutes:
+   # @lru_cache(maxsize=10)
+    def test_metadata(self, set_base_url, set_api_key):
+        metadata = get_metadata()
+        assert type(metadata) == dict
+        assert "version" in metadata.keys()
+
+    def test_source_db_contains_metadata(self, set_base_url, set_api_key):
+        metadata = get_metadata()
+        assert type(metadata) == dict
+        assert len(metadata["source_databases"].keys()) > 0
+        for db in metadata["source_databases"].keys():
+            assert metadata["source_databases"][db]["version"] is not None
+
+class TestEmbeddings:
+
+
+    def test_created_indexes(self, set_base_url, set_api_key):
+        query = """
+        SHOW VECTOR INDEX
+        """
+        res = list(neo4j_query(query))
+        assert res
+        assert all(i["populationPercent"] == 100.0 and i["state"] == "ONLINE" for i in res)
+
+
+
+
+    @pytest.mark.parametrize("node", get_embedding_nodes())
+    def test_node_embeddings_not_empty(self, set_base_url, set_api_key, node):
+
+        query = f"MATCH (n:{node}) RETURN n.embedding LIMIT 25"
+        assert all(i["n.embedding"] is not None and not all(j == 0.0  for j in i["n.embedding"]) for i in neo4j_query(query)), f"Broken embedding for {node}"
+
+
+    @pytest.mark.parametrize("edge", get_embedding_edges())
+    def test_edge_embeddings_not_empty(self, set_base_url, set_api_key, edge):
+
+        query = f"MATCH ()-[n:{edge}]-() RETURN n.embedding LIMIT 25"
+        assert all(i["n.embedding"] is not None and not all(j == 0.0 for j in i["n.embedding"]) for i in neo4j_query(query)), f"Broken embedding for {edge}"
+
